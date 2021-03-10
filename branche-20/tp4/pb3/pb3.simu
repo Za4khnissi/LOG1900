@@ -1,0 +1,45 @@
+<circuit noLinStep="10" type="simulide_0.1" noLinAcc="5" speed="1000000" reactStep="50" animate="0">
+ 
+Roue-4: 
+<item vflip="1" valLabRot="0" rotation="-180" y="4" valLabely="0" hflip="1" labelx="-16" objectName="Roue-4" valLabelx="0" id="Roue-4" Show_id="false" x="276" itemtype="Roue" labelrot="0" labely="-48"/>
+ 
+Roue-3: 
+<item vflip="1" valLabRot="0" rotation="0" y="4" valLabely="0" hflip="1" labelx="-16" objectName="Roue-3" valLabelx="0" id="Roue-3" Show_id="false" x="-364" itemtype="Roue" labelrot="0" labely="-48"/>
+ 
+atmega324a-2: 
+<item x="-84" labely="-20" valLabRot="0" labelrot="0" Mhz="16" eeprom="" y="-364" Show_id="true" Program="" rotation="0" valLabely="0" labelx="0" Logic_Symbol="false" vflip="1" hflip="1" valLabelx="0" id="atmega324a-2" itemtype="AVR" Ser_Monitor="false" Ser_Port="false" objectName="atmega324a-2"/>
+ 
+PONTH-1: 
+<item vflip="1" valLabRot="0" rotation="0" y="-52" valLabely="0" hflip="1" labelx="-16" objectName="PONTH-1" valLabelx="0" id="PONTH-1" Show_id="false" x="-52" itemtype="PONTH" labelrot="0" labely="-48"/>
+ 
+Connector-5: 
+<item x="-268" labely="-24" valLabRot="0" labelrot="0" y="-12" Show_id="false" rotation="0" valLabely="0" pointList="-268,-12,-268,-36,-188,-36" labelx="-16" startpinid="Roue-3-pin1" vflip="1" hflip="1" endpinid="PONTH-1-sortieGaucheHaut" valLabelx="0" id="Connector-5" itemtype="Connector" enodeid="enode-5" objectName="Connector-5"/>
+ 
+Connector-6: 
+<item x="-268" labely="-24" valLabRot="0" labelrot="0" y="20" Show_id="false" rotation="0" valLabely="0" pointList="-268,20,-220,20,-220,-20,-188,-20" labelx="-16" startpinid="Roue-3-pin2" vflip="1" hflip="1" endpinid="PONTH-1-sortieGaucheBas" valLabelx="0" id="Connector-6" itemtype="Connector" enodeid="enode-6" objectName="Connector-6"/>
+ 
+Connector-7: 
+<item x="180" labely="-24" valLabRot="0" labelrot="0" y="-12" Show_id="false" rotation="0" valLabely="0" pointList="180,-12,156,-12,156,-36,84,-36" labelx="-16" startpinid="Roue-4-pin2" vflip="1" hflip="1" endpinid="PONTH-1-sortieDroiteHaut" valLabelx="0" id="Connector-7" itemtype="Connector" enodeid="enode-7" objectName="Connector-7"/>
+ 
+Connector-8: 
+<item x="180" labely="-24" valLabRot="0" labelrot="0" y="20" Show_id="false" rotation="0" valLabely="0" pointList="180,20,124,20,124,-20,84,-20" labelx="-16" startpinid="Roue-4-pin1" vflip="1" hflip="1" endpinid="PONTH-1-sortieDroiteBas" valLabelx="0" id="Connector-8" itemtype="Connector" enodeid="enode-8" objectName="Connector-8"/>
+ 
+Connector-9: 
+<item x="-92" labely="-24" valLabRot="0" labelrot="0" y="-212" Show_id="false" rotation="0" valLabely="0" pointList="-92,-212,-116,-212,-116,-140,116,-140,116,-76,84,-76" labelx="-16" startpinid="atmega324a-2-PD5" vflip="1" hflip="1" endpinid="PONTH-1-enableDroitePin" valLabelx="0" id="Connector-9" itemtype="Connector" enodeid="enode-9" objectName="Connector-9"/>
+ 
+Connector-10: 
+<item x="-92" labely="-24" valLabRot="0" labelrot="0" y="-220" Show_id="false" rotation="0" valLabely="0" pointList="-92,-220,-228,-220,-228,-76,-188,-76" labelx="-16" startpinid="atmega324a-2-PD4" vflip="1" hflip="1" endpinid="PONTH-1-enableGauchePin" valLabelx="0" id="Connector-10" itemtype="Connector" enodeid="enode-10" objectName="Connector-10"/>
+ 
+Connector-11: 
+<item x="-28" labely="-24" valLabRot="0" labelrot="0" y="-212" Show_id="false" rotation="0" valLabely="0" pointList="-28,-212,-12,-212,-12,-148,-252,-148,-252,-68,-188,-68" labelx="-16" startpinid="atmega324a-2-PC0" vflip="1" hflip="1" endpinid="PONTH-1-directionGauchePin" valLabelx="0" id="Connector-11" itemtype="Connector" enodeid="enode-11" objectName="Connector-11"/>
+ 
+Connector-12: 
+<item x="-28" labely="-24" valLabRot="0" labelrot="0" y="-220" Show_id="false" rotation="0" valLabely="0" pointList="-28,-220,140,-220,140,-68,84,-68" labelx="-16" startpinid="atmega324a-2-PC1" vflip="1" hflip="1" endpinid="PONTH-1-directionDroitePin" valLabelx="0" id="Connector-12" itemtype="Connector" enodeid="enode-12" objectName="Connector-12"/>
+ 
+PlotterWidget: 
+<item sizePolicy="" whatsThis="" itemtype="Plotter" childrenRect="" y="0" minimumWidth="200" MaxVolt="500" tabletTracking="false" palette="" statusTip="" toolTipDuration="-1" sizeIncrement="" accessibleDescription="" MinVolt="-500" pos="" windowModified="false" sizeHint="" Tracks="1" autoFillBackground="false" focus="false" isActiveWindow="true" maximumWidth="1000" windowOpacity="1" windowIcon="" windowIconText="" width="200" mouseTracking="false" inputMethodHints="0" normalGeometry="" modal="false" toolTip="" geometry="" x="0" contextMenuPolicy="1" acceptDrops="false" font="Ubuntu,11,-1,5,50,0,0,0,0,0" layoutDirection="0" baseSize="" maximized="false" height="200" cursor="" minimumHeight="200" objectName="PlotterWidget" maximumSize="" fullScreen="false" minimumSize="" windowFilePath="" childrenRegion="" windowModality="0" visible="false" updatesEnabled="true" locale="" maximumHeight="200" accessibleName="" styleSheet="" rect="" frameGeometry="" frameSize="" Scale="1" size="" minimized="false" windowTitle="" minimumSizeHint="" enabled="true" focusPolicy="0"/>
+ 
+SerialPortWidget: 
+<item sizePolicy="" whatsThis="" itemtype="SerialPort" childrenRect="" y="0" minimumWidth="0" tabletTracking="false" palette="" statusTip="" toolTipDuration="-1" sizeIncrement="" accessibleDescription="" pos="" windowModified="false" sizeHint="" autoFillBackground="false" focus="false" isActiveWindow="true" maximumWidth="450" windowOpacity="1" windowIcon="" windowIconText="" width="313" mouseTracking="false" inputMethodHints="0" normalGeometry="" modal="false" toolTip="" geometry="" x="0" contextMenuPolicy="1" acceptDrops="false" font="Ubuntu,11,-1,5,50,0,0,0,0,0" layoutDirection="0" baseSize="" maximized="false" height="141" cursor="" minimumHeight="0" objectName="SerialPortWidget" SettingsProp=",0,3,0,0,0" maximumSize="" fullScreen="false" minimumSize="" windowFilePath="" childrenRegion="" windowModality="0" visible="false" updatesEnabled="true" locale="" maximumHeight="170" accessibleName="" styleSheet="" rect="" frameGeometry="" frameSize="" size="" minimized="false" windowTitle="Settings" minimumSizeHint="" enabled="true" focusPolicy="0"/>
+ 
+</circuit>
