@@ -30,4 +30,36 @@ sei ();
 }
 
 
+void timer::setPrescaler(unsigned int prescaler)
+{
+    TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
+    switch (prescaler){
+
+        case 1: // clk/1 (No prescaling)
+        TCCR1B |=  (1 << CS10);
+        break;
+
+        case 8: // clk/8 (From prescaler)
+        TCCR1B |=  (1 << CS11);
+        break;
+
+        case 64: // clk/64 (From prescaler)
+        TCCR1B |=  (1 << CS11) | (1 << CS10);
+        break;
+
+        case 256: // clk/256 (From prescaler)
+        TCCR1B |=  (1 << CS12);
+        break;
+
+        case 1024: // clk/1024 (From prescaler)
+        TCCR1B |=  (1 << CS12) | (1 << CS10);
+        break;
+
+        default:
+        //printf("Entrer une valeur valide. \n");
+        break;
+    }
+}
+
+
 
