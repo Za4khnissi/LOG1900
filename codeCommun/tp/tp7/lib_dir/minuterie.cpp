@@ -15,13 +15,13 @@ void timer::partirMinuterie(uint16_t duree, uint16_t debut)
 
 
 
-void timer::initialisationMinuterie (uint8_t valeurDDRA, uint8_t valeurDDRD) {
+void timer::initialisationMinuterie (uint8_t valeurDDRx, uint8_t valeurDDRy, volatile uint8_t* DDRx, volatile uint8_t DDRy) {
 
 
 cli ();
 
-DDRA = valeurDDRA;
-DDRD = valeurDDRD;
+*DDRx = valeurDDRx;
+*DDRy = valeurDDRy;
 
 EIMSK |= (1 << INT0) ;
 
