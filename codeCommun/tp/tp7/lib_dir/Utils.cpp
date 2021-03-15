@@ -1,9 +1,11 @@
-#include <avr/io.h> 
 #include "Utils.h"
 
+#define OFF 0
 #define GREEN 1
 #define RED 2
 #define AMBRE 3
+
+#define ANTIREBOUND 10
 
 void Utils::setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
 {
@@ -32,9 +34,14 @@ void Utils::setDELColor(uint8_t &port, uint8_t color)
         port = color;
 }
 
-void debounce();
+bool Utils::debounce(uint8_t &pin, uint8_t pressedButton) {
+    
+    bool isPressed = false; 
+    if (pin & (1 << pressedButton)) {
+        _delay_ms(ANTIREBOUND);
+        if (pin & (1 << pressedButton))
+            isPressed = true;
+    }
+    return isPressed;
+}
 
-/*
-
-
-*/

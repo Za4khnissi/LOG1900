@@ -14,20 +14,18 @@ void timer::startTimer(uint16_t duration, uint16_t start, unsigned int prescaler
     TIMSK1 = 1 << OCIE1A;
 }
 
-
-
 void timer::initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy) {
 
-cli ();
+    cli ();
 
-*DDRx = valueDDRx;
-*DDRy = valueDDRy;
+    *DDRx = valueDDRx;
+    *DDRy = valueDDRy;
 
-EIMSK |= (1 << INT0) ;
+    EIMSK |= (1 << INT0) ;
 
-EICRA |= (1 << ISC01) | (1 << ISC00);
+    EICRA |= (1 << ISC01) | (1 << ISC00);
 
-sei ();
+    sei ();
 }
 
 
