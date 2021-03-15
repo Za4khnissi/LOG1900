@@ -1,26 +1,27 @@
 #include "minuterie.h"
 
 
-void timer::partirMinuterie(uint16_t duree, uint16_t debut)
+void timer::startTimer(uint16_t duration, uint16_t start, unsigned int prescaler)
 {
 
     // mode CTC du timer 1 avec horloge divisée par 1024
-    TCNT1 = debut;
-    OCR1A = duree;
+    TCNT1 = start;
+    OCR1A = duration;
     TCCR1A = 1 << WGM12;
-    TCCR1B = 1 << CS12 | 1 << CS10;
+    setPrescaler(prescaler);
+    //TCCR1B = 1 << CS12 | 1 << CS10;
     TCCR1C = 0;
     TIMSK1 = 1 << OCIE1A;
 }
 
 
 
-void timer::initialisationMinuterie (uint8_t valeurDDRx, uint8_t valeurDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy) {
+void timer::initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy) {
 
 cli ();
 
-*DDRx = valeurDDRx;
-*DDRy = valeurDDRy;
+*DDRx = valueDDRx;
+*DDRy = valueDDRy;
 
 EIMSK |= (1 << INT0) ;
 

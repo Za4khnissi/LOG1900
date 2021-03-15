@@ -5,6 +5,6 @@
 namespace timer
 {
     void setPrescaler(unsigned int prescaler);
-    void partirMinuterie(uint16_t duree, uint16_t debut);
-    void initialisationMinuterie (uint8_t valeurDDRx, uint8_t valeurDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy);
+    void startTimer(uint16_t duree, uint16_t start, unsigned int prescaler);
+    void initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy);
 } // namespace name

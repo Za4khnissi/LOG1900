@@ -4,7 +4,7 @@
 #ifndef UART_H
 #define UART_H
 
-void initialisationUART ( void );
-void transmissionUART ( uint8_t donnee );
+void initializeUART ( void );
+void transmissionUART ( uint8_t data );
 
 #endif

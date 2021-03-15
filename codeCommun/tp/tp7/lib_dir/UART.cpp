@@ -1,6 +1,6 @@
 #include "UART.h"
 
-void initialisationUART ( void ) {
+void initializeUART ( void ) {
 
 // 2400 bauds. Nous vous donnons la valeur des deux
 
@@ -22,10 +22,10 @@ UCSR0C = (1 << UCSZ01) | (1 << UCSZ00) | (0 << USBS0) | (0 << UPM01) | (0 << UPM
 
 }
 
-void transmissionUART ( uint8_t donnee ) {
+void transmissionUART ( uint8_t data ) {
 
     while ( !( UCSR0A & (1<<UDRE0)));
-    UDR0 = donnee;
+    UDR0 = data;
 }
 
 
