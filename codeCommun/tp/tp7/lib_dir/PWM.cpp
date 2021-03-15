@@ -1,7 +1,7 @@
 #include "PWM.h"
 
 
-void ajusterPWM(uint8_t duree){
+void PWM::ajusterPWM(uint8_t duree){
 
     OCR1A = duree;
     OCR1B = duree;

@@ -4,6 +4,9 @@
 #ifndef PWM_H
 #define PWM_H
 
-    void ajusterPWM(uint8_t duree);
+namespace{
+        void ajusterPWM(uint8_t duree);
+}
+
 
 #endif
