@@ -1,26 +1,12 @@
 #include "Button.h"
 
-// constructeur : initialisation du bouton
-Button::Button(ButtonDDR buttonDDR, uint8_t pin)
+// constructeur : met la broche sur laquelle le bouton est connecté en entrée
+Button::Button(volatile uint8_t* DDRx, uint8_t pin)
 {
-    switch (buttonDDR)
-    {
-    case pseudoDDRA:
-        DDRA &= ~(1 << pin);
-        break;
-    case pseudoDDRB:
-        DDRB &= ~(1 << pin);
-        break;
-    case pseudoDDRC:
-        DDRC &= ~(1 << pin);
-        break;
-    case pseudoDDRD:
-        DDRD &= ~(1 << pin);
-        break;
-    }
+    *DDRx &= ~(1 << pin); 
 } 
 
-Button::Button(ButtonDDR btnDDR[], uint8_t pins[], uint8_t nbButtons){
+Button::Button(volatile uint8_t *btnDDR[], uint8_t pins[], uint8_t nbButtons){
 
     for (uint8_t i = 0; i < nbButtons; i++)
     {
@@ -33,7 +19,7 @@ void Button::initialization(PseudoPin pseudoPin, InterruptSenseControl ics)
 {
     cli();
 
-    switch (pseudoPin) //Remember to also handle the case when the button is PB2
+    switch (pseudoPin) 
     {
         case pseudoPD2:
             EIMSK |= (1 << INT0);
