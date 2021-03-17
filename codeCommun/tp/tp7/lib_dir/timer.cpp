@@ -14,6 +14,7 @@ void timer::startTimer(uint16_t duration, uint16_t start, unsigned int prescaler
     TIMSK1 = 1 << OCIE1A;
 }
 
+
 void timer::initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8_t* DDRx, volatile uint8_t* DDRy) {
 
     cli ();
@@ -21,7 +22,7 @@ void timer::initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8
     *DDRx = valueDDRx;
     *DDRy = valueDDRy;
 
-    EIMSK |= (1 << INT0) ;
+    EIMSK |= (1 << INT0);
 
     EICRA |= (1 << ISC01) | (1 << ISC00);
 
@@ -32,7 +33,7 @@ void timer::initializeTimer(uint8_t valueDDRx, uint8_t valueDDRy, volatile uint8
 void timer::setPrescaler(unsigned int prescaler)
 {
     TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
-    switch (prescaler){
+    switch (prescaler) {
 
         case 1: // clk/1 (No prescaling)
         TCCR1B |=  (1 << CS10);

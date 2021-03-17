@@ -47,7 +47,7 @@ can::lecture( uint8_t pos)
    // Garder les bits de ADMUX intacts, sauf les bit permettant 
    // la selection de l'entree
    ADMUX  &=  ~(( 1 << MUX4 ) | ( 1 << MUX3 ) | 
-                ( 1 << MUX2 ) | ( 1 << MUX1)  | ( 1 << MUX0 )); 
+               ( 1 << MUX2 ) | ( 1 << MUX1)  | ( 1 << MUX0 )); 
 
    // selectionner l'entree voulue
    ADMUX |= ((pos & 0x07) << MUX0) ;
