@@ -18,7 +18,7 @@ void Utils::setDELColor(uint8_t &port, uint8_t color)
         static bool val = false;
         if(val)
             port = GREEN;
-        else{
+        else {
             port = RED;
         }
         val = !val;
@@ -31,12 +31,20 @@ void Utils::dynamic_delay_us(uint16_t delay)
 {
     if(delay < THRESHOLD)
     {
-        _delay_ms(THRESHOLD);
+        for (uint16_t i = 0; i < delay; i++)
+        {
+            _delay_ms(1);
+        }
     } else 
     {
-        for (uint16_t i = 0; i < delay / 10; i++)
+        uint16_t jump = delay >> 2;
+        for (uint16_t i = 0; i < delay; i+= jump)
         {
-            _delay_ms(JUMP);
+            for (uint8_t j = 0; j < jump / 10; j++)
+            {
+                _delay_ms(10);
+            }
+            
         }
     }
 

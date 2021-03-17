@@ -22,7 +22,7 @@ private:
         RISING_EDGE
     };
 public:
-    Button(volatile uint8_t *DDRx, uint8_t pin);
+    Button(volatile uint8_t &DDRx, uint8_t pin);
     Button(volatile uint8_t *DDRx[], uint8_t pins[], uint8_t nbButtons);
     ~Button();
     void initialization(PseudoPin pseudoPin, InterruptSenseControl ics);
