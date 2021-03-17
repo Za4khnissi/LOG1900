@@ -8,8 +8,7 @@ void timer::startTimer(uint16_t duration, uint16_t start, unsigned int prescaler
     TCNT1 = start;
     OCR1A = duration;
     TCCR1A = 1 << WGM12;
-    setPrescaler(prescaler);
-    //TCCR1B = 1 << CS12 | 1 << CS10;
+    setPrescaler(prescaler); // TCCR1B 
     TCCR1C = 0;
     TIMSK1 = 1 << OCIE1A;
 }
