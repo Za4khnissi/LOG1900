@@ -1,7 +1,15 @@
+#define F_CPU 8000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/delay.h>
+#include <util/delay.h>
 
+#define OFF   0
+#define GREEN 1
+#define RED   2
+#define AMBRE 3
+
+#define THRESHOLD 4
+#define JUMP      10
 
 enum PinState {
     LOW, 
@@ -12,5 +20,5 @@ namespace Utils
 {
     void setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins);
     void setDELColor(uint8_t &port, uint8_t color);
-    bool debounce(uint8_t &pin, uint8_t pressedButton);
-}
+    void dynamic_delay_us(uint16_t delay);
+}   

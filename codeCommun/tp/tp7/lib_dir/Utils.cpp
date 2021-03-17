@@ -1,12 +1,5 @@
 #include "Utils.h"
 
-#define OFF 0
-#define GREEN 1
-#define RED 2
-#define AMBRE 3
-
-#define ANTIREBOUND 10
-
 void Utils::setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
 {
     for(uint8_t i = 0; i < nbPins; i++)
@@ -34,14 +27,19 @@ void Utils::setDELColor(uint8_t &port, uint8_t color)
         port = color;
 }
 
-bool Utils::debounce(uint8_t &pin, uint8_t pressedButton) {
-    
-    bool isPressed = false; 
-    if (pin & (1 << pressedButton)) {
-        _delay_ms(ANTIREBOUND);
-        if (pin & (1 << pressedButton))
-            isPressed = true;
+void Utils::dynamic_delay_us(uint16_t delay)
+{
+    if(delay < THRESHOLD)
+    {
+        _delay_ms(THRESHOLD);
+    } else 
+    {
+        for (uint16_t i = 0; i < delay / 10; i++)
+        {
+            _delay_ms(JUMP);
+        }
     }
-    return isPressed;
+
 }
+
 
