@@ -1,6 +1,7 @@
+#define F_CPU 8000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/delay.h>
+#include <util/delay.h>
 
 #ifndef BUTTON_H
 #define BUTTON_H
@@ -34,4 +35,4 @@ public:
     bool debounce(uint8_t &pin, uint8_t buttonMask);
 };
 
-#endif BUTTON_H
+#endif //BUTTON_H

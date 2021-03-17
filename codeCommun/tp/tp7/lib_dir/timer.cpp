@@ -1,4 +1,4 @@
-#include "minuterie.h"
+#include "timer.h"
 
 
 void timer::startTimer(uint16_t duration, uint16_t start, unsigned int prescaler)
