@@ -20,5 +20,5 @@ namespace Utils
 {
     void setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins);
     void setDELColor(uint8_t &port, uint8_t color);
-    void dynamic_delay_us(uint16_t delay);
+    void dynamic_delay_ms(uint16_t delay);
 }   

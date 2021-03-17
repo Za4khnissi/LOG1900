@@ -15,10 +15,10 @@ Button::Button(volatile uint8_t *btnDDR[], uint8_t pins[], uint8_t nbButtons){
 }
 
 
-void Button::initialization(PseudoPin pseudoPin, InterruptSenseControl ics)
+void Button::setSenseControl(PseudoPin pseudoPin, InterruptSenseControl ics)
 {
     cli();
-
+    
     switch (pseudoPin) 
     {
         case pseudoPD2:

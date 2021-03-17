@@ -25,7 +25,8 @@ public:
     Button(volatile uint8_t &DDRx, uint8_t pin);
     Button(volatile uint8_t *DDRx[], uint8_t pins[], uint8_t nbButtons);
     ~Button();
-    void initialization(PseudoPin pseudoPin, InterruptSenseControl ics);
+    void setSenseControl(PseudoPin pseudoPin, InterruptSenseControl ics);
+    uint8_t mask(uint8_t &port, uint8_t pin);
     bool debounce(uint8_t &pin, uint8_t buttonMask);
 };
 
