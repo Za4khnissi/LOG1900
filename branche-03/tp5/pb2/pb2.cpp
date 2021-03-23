@@ -9,23 +9,18 @@
 
 void initialisationUART ( void ) {
 
-// 2400 bauds. Nous vous donnons la valeur des deux
+    // 2400 bauds. Nous vous donnons la valeur des deux
+    // premier registres pour vous éviter des complications
 
-// premier registres pour vous éviter des complications
+    UBRR0H = 0;
+    UBRR0L = 0xCF;
 
-UBRR0H = 0;
+    // permettre la réception et la transmission par le UART0
+    UCSR0A = 0 ;
+    UCSR0B = (1 << RXEN0) | (1 << TXEN0) ;
 
-UBRR0L = 0xCF;
-
-// permettre la réception et la transmission par le UART0
-
-UCSR0A = 0 ;
-
-UCSR0B = (1 << RXEN0) | (1 << TXEN0) ;
-
-// Format des trames: 8 bits, 1 stop bits, none parity
-
-UCSR0C = (1 << UCSZ01) | (1 << UCSZ00) | (0 << USBS0) | (0 << UPM01) | (0 << UPM00)  ;
+    // Format des trames: 8 bits, 1 stop bits, none parity
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00) | (0 << USBS0) | (0 << UPM01) | (0 << UPM00)  ;
 
 }
 
@@ -38,15 +33,17 @@ void transmissionUART ( uint8_t donnee ) {
     UDR0 = donnee;
 }
 
-int main(){
-char mots[35] = "Le simulateur SimulIDE en INF1900\n";
-uint8_t i, j;
-for ( i = 0; i < 100; i++ ) {
-    for ( j=0; j < 34; j++ ) {
-        transmissionUART ( mots[j] );
+int main()
+{
+
+    char mots[35] = "Le simulateur SimulIDE en INF1900\n";
+    uint8_t i, j;
+    for ( i = 0; i < 100; i++ ) {
+        for ( j=0; j < 34; j++ ) {
+            transmissionUART ( mots[j] );
+        }
     }
-}
-return 0;
+    return 0;
 }
 
 
