@@ -23,19 +23,21 @@ MCU=atmega324pa
 
 # Nom de votre projet
 # (utilisez un seul mot, exemple: 'monprojet')
-PROJECTNAME=debug
+#Nom de la librairie  **************************************************************
+PROJECTNAME=libstatique
 
 # Fichiers sources
-# Utilisez le suffixe .cpp pour les fichiers C++c
+# Utilisez le suffixe .cpp pour les fichiers C++
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
-PRJSRC=main.cpp
+# pour prendre tous les fichiers sources ***********************************
+PRJSRC=$(wildcard *.cpp)
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
-INC= -I ./lib_dir
+INC=
 
 # Libraires a lier (ex: -lmylib)
-LIBS= -l statique -L ./lib_dir
+LIBS=
 
 # Niveau d'optimization
 # Utilisez s (size opt), 1, 2, 3 ou 0 (off)
@@ -62,6 +64,9 @@ AVRDUDE_PROGRAMMERID=usbasp
 
 #compilateur utilise
 CC=avr-gcc
+#compilateur utilisé lors de la création de la librairie
+# Appel de la commande ar (archive) pour la production de la librarie statique****************************
+AR=avr-ar
 #pour copier le contenu d'un fichier objet vers un autre
 OBJCOPY=avr-objcopy
 #pour permettre le transfert vers le microcontroleur
@@ -79,24 +84,32 @@ HEXFORMAT=ihex
 CFLAGS=-I. -I/usr/include/simavr  -MMD $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 	-fpack-struct -fshort-enums             \
 	-funsigned-bitfields -funsigned-char    \
-	-Wall    \
-	-g3 -gdwarf-2                                        
+	-Wall                                        
 
 # Flags pour le compilateur en C++
-CXXFLAGS=-fno-exceptions	\
-	-g3 -gdwarf-2     
+CXXFLAGS=-fno-exceptions     
 
 # Linker pour lier les librairies utilisees
 LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU)
 
+# Option de linking de la librairie
+MES_OPTIONS=-crs
+																			#-c (Create the archive)
+																			#-r (insert the files member... into archive)
+																			#-s (Write an object-file index into the archive, or update an existing one)
 
+#Variable 'MACOMMANDE' qui remplace la commande de l'edition de lien (Linkage)
+#MACOMMANDE=$(AVR) $(MES_OPTIONS) -o $(TRG) $(OBJDEPS)					
 
 ####### Cible (Target) #######
 
 #Nom des cibles par defaut
-TRG=$(PROJECTNAME).elf
+#TRG=$(PROJECTNAME).elf
+#.a pour la librairie statique **********************************
 HEXROMTRG=$(PROJECTNAME).hex
+TRG=$(PROJECTNAME).a
 HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
+
 
 
 ####### Definition de tout les fichiers objets #######
@@ -129,16 +142,13 @@ OBJDEPS=$(CFILES:.c=.o) \
 
 # Make all permet simplement de compiler le projet
 #
-all: $(TRG) $(HEXROMTRG)
+all: $(TRG)
 
-debug: CXXFLAGS += -DDEBUG -g
-debug: CFLAGS += -DDEBUG -g
-debug: $(TRG) $(HEXROMTRG)
-
-# Implementation de la cible
+# Implementation de la cible			
+#Appel avr-ar avec les options demandées *************************			
+#Pas de besoin "$(LIBS)" puisque ce makefile crée la librairie elle-meme ****************					
 $(TRG): $(OBJDEPS)
-	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) \
-	-lm $(LIBS)
+	$(AR) $(MES_OPTIONS) -o $(TRG) $(OBJDEPS)
 
 # Production des fichiers object
 # De C a objet
@@ -155,9 +165,9 @@ $(TRG): $(OBJDEPS)
 # http://bit.ly/2580FU8
 
 # Production des fichiers hex a partir des fichiers elf
-%.hex: %.elf
-	$(OBJCOPY) -j .text -j .data \
-		-O $(HEXFORMAT) $< $@
+#%.hex: %.elf
+#	$(OBJCOPY) -j .text -j .data \
+#		-O $(HEXFORMAT) $< $@
 
 # Make install permet de compiler le projet puis
 # d'ecrire le programme en memoire flash dans votre
