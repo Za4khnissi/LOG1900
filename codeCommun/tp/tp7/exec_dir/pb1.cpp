@@ -13,6 +13,7 @@ Si la lumière est trop forte (photorésistance sous une lampe de poche), la DEL
 
 #include <avr/io.h>
 #include "can.h"
+#include "PWM.h"
 
 
 /*************************************************************************************

@@ -40,6 +40,7 @@ Etat present    Entree D2  Entree D3   Etat suivant       Sortie
 #include <util/delay.h>
 #include "debug.h"
 
+
 #define ANTIREBOND 10
 #define UNE_SECONDE 1000
 
