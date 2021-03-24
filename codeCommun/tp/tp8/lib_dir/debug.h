@@ -17,4 +17,3 @@
 
 void initialisationUART();
 void transmissionUART(unsigned char data);
-void transmissionMessage(const char etatActuel[], uint8_t taille);
