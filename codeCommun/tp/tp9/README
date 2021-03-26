@@ -1,0 +1,16 @@
+UART.h/cpp:
+	-Changer le namespace en une classe UART.
+	-Ajouter uint8_t received();
+
+debug.h:
+	-Changer implementation pour supprimer la redondance du code.
+	-debug.cpp supprimer (pas besoins).
+	
+
+main.cpp (fichier principal)
+	-Ajouter la fonction receptionInstructions() qui ecrit les instructions sur la memoire.
+	-squelette du corps de notre programme.
+	
+
+
+
