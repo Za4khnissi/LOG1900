@@ -1,6 +1,22 @@
-#include "Utils.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
 
-void Utils::setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
+#define OFF   0
+#define GREEN 1
+#define RED   2
+#define AMBRE 3
+
+#define THRESHOLD 4
+#define JUMP      10
+
+enum PinState {
+    LOW, 
+    HIGH 
+};
+
+
+void setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
 {
     for(uint8_t i = 0; i < nbPins; i++)
     {
@@ -11,7 +27,7 @@ void Utils::setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinStat
     }
 }
 
-void Utils::setDELColor(uint8_t &port, uint8_t color)
+void setDELColor(uint8_t &port, uint8_t color)
 {
     if (color == AMBRE)
     {
@@ -27,7 +43,7 @@ void Utils::setDELColor(uint8_t &port, uint8_t color)
         port = color;
 }
 
-void Utils::dynamic_delay_ms(uint16_t delay)
+void dynamic_delay_ms(uint16_t delay)
 {
     if (delay < THRESHOLD)
     {
@@ -49,5 +65,3 @@ void Utils::dynamic_delay_ms(uint16_t delay)
     }
 
 }
-
-

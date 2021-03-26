@@ -79,7 +79,7 @@ HEXFORMAT=ihex
 CFLAGS=-I. -I/usr/include/simavr  -MMD $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 	-fpack-struct -fshort-enums             \
 	-funsigned-bitfields -funsigned-char    \
-	-Wall                                        
+	-Wall -std=c++14                                     
 
 # Flags pour le compilateur en C++
 CXXFLAGS=-fno-exceptions     

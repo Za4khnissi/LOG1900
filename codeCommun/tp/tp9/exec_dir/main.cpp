@@ -1,10 +1,11 @@
 #include <avr/io.h>
 #define F_CPU 8000000
 #include <util/delay.h>
+#include <avr/eeprom.h>
 
 #include "UART.h"
 #include "debug.h"
-#include "Utils.h"
+#include "Utils.cpp"
 
 #define UNE_FOIS 1
 
