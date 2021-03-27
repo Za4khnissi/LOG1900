@@ -6,7 +6,7 @@
 
 namespace PWM
 {
-        void adjustPWM(uint8_t duration);
+        void adjustPWM(uint8_t ocr1a, uint8_t ocr1b);
 }
 
 

@@ -1,3 +1,4 @@
+#define __DELAY_BACKWARD_COMPATIBLE__
 #include <avr/io.h>
 #define F_CPU 8000000
 #include <util/delay.h>
@@ -5,9 +6,31 @@
 
 #include "UART.h"
 #include "debug.h"
-#include "Utils.cpp"
+#include "Wheel.h"
+#include "Del.h"
+#include "Utils.h"
 
 #define UNE_FOIS 1
+
+enum Instruction {
+
+    DBT = 0X01,
+    ATT = 0X2,
+    DAL = 0X44,
+    DET = 0x45,
+    MON = 0x18,
+    MOF = 0x19,
+    MAR = 0x60, 
+    MBR = 0x61,
+    MAV = 0x62,
+    MRE = 0x63,
+    TRD = 0x64,
+    TRG = 0x65,
+    DBC = 0xC0,
+    FBC = 0xC1,
+    FIN = 0xFF,
+
+};
 
 //void eeprom_write_byte (uint8_t * adresse, uint8_t value);
 //uint8_t eeprom_read_byte (const uint8_t * adresse);
@@ -54,26 +77,26 @@ uint16_t receptionInstrustions() {
     return instructionSize;
 }
 
+//Instruction: dal
+void allumerDEL(Del del, uint8_t operande){
+    if(operande <= 127){
+        del.setDelColor(&PORTA, GREEN);
+    }
+    else {
+        del.setDelColor(&PORTA, RED);
 
+    }
+}
 
-enum Instructions {
-    dbt = 0x01, // debut
-    att = 0x02, // attendre
-    dal = 0x44, // allumer DEL bicolore
-    det = 0x45, // eteindre DEL bicolore
-    mon = 0x18, // allumer matrice de DEL
-    mof = 0x19, // eteindre matrice de DEL
-    mar = 0x60, // arreter moteurs
-    mbr = 0x61, // arreter moteurs
-    mav = 0x62, // avancer
-    mre = 0x63, // reculer
-    trd = 0x64, // tourner a droite
-    trg = 0x65, // tourner gauche
-    dbc = 0xA0, // debut boucle
-    fbc = 0xA1, // fin boucle
-    fin = 0xFF, // fin
-};
+//Instruction: det
+void eteindreDEL(Del del){
+    del.setDelColor(&PORTA, OFF);
+}
 
+//Instruction: att
+void attendre(uint8_t operande) {
+    _delay_ms(25*operande);
+}
 
 
 int main() {
@@ -102,7 +125,7 @@ int main() {
     uint8_t instruction;
 
     //Variable qui stock l'operande qui suit l'instruction
-    uint8_t operande;
+    uint8_t operande = 0;
 
     //Ici on fait appel a la fonction receptionInstrustions 
     //qui ecrit les donnees recues par UART sur la memoire
@@ -136,7 +159,7 @@ int main() {
 
         //on verifie si l'instruction est debut avant de rentrer 
         //dans le switch statement dans la premiere fois sinon on fait rien
-        if(instruction == dbt)
+        if(instruction == DBT)
             executionCode = true;
 
 
@@ -144,82 +167,79 @@ int main() {
 
             switch (instruction) {
 
-                case att:
+                case ATT:
                     DEBUG_PRINT(("Instruction attendre...\n"));
                     // A completer
 
                     break;
 
-                case dal:
+                case DAL:
                     DEBUG_PRINT(("Instruction allumer Del...\n"));
                     // A completer
 
                     break;
 
-                case det:
+                case DET:
                     DEBUG_PRINT(("Instruction eteindre Del...\n"));
                     // A completer
 
                     break;
 
-                case mon:
+                case MON:
                     DEBUG_PRINT(("Instruction allumer matrix Del...\n"));
-                    allumerMatrice(operande);
+                    Utils::allumerMatrice(operande);
                     break;
 
-                case mof:
+                case MOF:
                     DEBUG_PRINT(("Instruction eteindre matrix Del...\n"));
-                    eteindreMatrix();
+                    Utils::eteindreMatrix();
                     break;
 
-                case mar:
+                case MAR:
                     DEBUG_PRINT(("Instruction arreter moteur...\n"));
                     // A completer
 
                     break;
 
-                case mbr:
+                case MBR:
                     DEBUG_PRINT(("Instruction arreter moteur...\n"));
                     // A completer
 
                     break;
 
-                case mav:
+                case MAV:
                     DEBUG_PRINT(("Instruction avancer moteur...\n"));
                     // A completer
 
-                    eteindreDirection();
-                    directionNord();
-                    _delay_ms(3000);
+                    Utils::eteindreDirection();
+                    Utils::directionNord();
                     break;
 
-                case mre:
+                case MRE:
                     DEBUG_PRINT(("Instruction reculer moteur...\n"));
                     // A completer
 
-                    eteindreDirection();
-                    directionSud();
-                    _delay_ms(3000);
+                    Utils::eteindreDirection();
+                    Utils::directionSud();
                     break;
 
-                case trd:
+                case TRD:
                     DEBUG_PRINT(("Instruction tourner moteur a droite...\n"));
                     // A completer
                     
-                    eteindreDirection();
-                    directionEst();
-                    _delay_ms(3000);
+                    Utils::eteindreDirection();
+                    Utils::directionEst();
                     break;
 
-                case trg:
+                case TRG:
                     DEBUG_PRINT(("Instruction tourner moteur a gauche...\n"));
                     // A completer
 
-                    eteindreDirection();
-                    directionOuest();
+                    Utils::eteindreDirection();
+                    Utils::directionOuest();
                     break;
 
-                case dbc:
+                case DBC:
                     DEBUG_PRINT(("Instruction debut boucle...\n"));
                     //compteurProg nous indique l'adresse du debut de la boucle
                     adressBoucle = compteurProg + UNE_FOIS;
@@ -227,7 +247,7 @@ int main() {
                     compteurBoucle = operande + UNE_FOIS;
                     break;
 
-                case fbc:
+                case FBC:
                     DEBUG_PRINT(("Instruction fin boucle...\n"));
                     //On verifie si le nombre d'iteration est termine
                     if(compteurBoucle > 0){
@@ -236,7 +256,7 @@ int main() {
                     }
                     break;
 
-                case fin:
+                case FIN:
                     DEBUG_PRINT(("Instruction fin tout court...\n"));
                     //A completer si possible sinon un return 0 suffira
 
@@ -248,3 +268,5 @@ int main() {
     }   
     //return 0;
 }
+
+

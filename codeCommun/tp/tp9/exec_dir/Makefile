@@ -23,10 +23,10 @@ MCU=atmega324pa
 
 # Nom de votre projet
 # (utilisez un seul mot, exemple: 'monprojet')
-PROJECTNAME=test
+PROJECTNAME=robot
 
 # Fichiers sources
-# Utilisez le suffixe .cpp pour les fichiers C++
+# Utilisez le suffixe .cpp pour les fichiers C++c
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
 PRJSRC=main.cpp
@@ -79,10 +79,12 @@ HEXFORMAT=ihex
 CFLAGS=-I. -I/usr/include/simavr  -MMD $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 	-fpack-struct -fshort-enums             \
 	-funsigned-bitfields -funsigned-char    \
-	-Wall -std=c++14                                     
+	-Wall -std=c++14    \
+	-g3 -gdwarf-2                                        
 
 # Flags pour le compilateur en C++
-CXXFLAGS=-fno-exceptions     
+CXXFLAGS=-fno-exceptions	\
+	-g3 -gdwarf-2     
 
 # Linker pour lier les librairies utilisees
 LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU)
@@ -95,7 +97,6 @@ LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU)
 TRG=$(PROJECTNAME).elf
 HEXROMTRG=$(PROJECTNAME).hex
 HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
-
 
 
 ####### Definition de tout les fichiers objets #######
@@ -129,6 +130,10 @@ OBJDEPS=$(CFILES:.c=.o) \
 # Make all permet simplement de compiler le projet
 #
 all: $(TRG) $(HEXROMTRG)
+
+debug: CXXFLAGS += -DDEBUG -g
+debug: CFLAGS += -DDEBUG -g
+debug: $(TRG) $(HEXROMTRG)
 
 # Implementation de la cible
 $(TRG): $(OBJDEPS)

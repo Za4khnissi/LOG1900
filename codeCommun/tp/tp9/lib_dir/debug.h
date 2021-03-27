@@ -1,5 +1,7 @@
 #include "UART.h"
 #include "string.h"
+#include <avr/io.h>
+#include <avr/eeprom.h>
 
 //#define DEBUG // à mettre en commentaire au besoin
 
@@ -17,5 +19,3 @@ UART uart;
 
 #endif
 
-//void initialisationUART();
-//void transmissionUART(unsigned char data);

@@ -1,13 +1,21 @@
 #include "Del.h"
 
+Del::Del()
+{
+}
+
+Del::~Del()
+{
+}
+
 void Del::setDelColor(volatile uint8_t *port, uint8_t color)
 {
-    if (color == DelColor::AMBRE)
+    if (color == AMBRE)
     {
         if(val)
-            *port |= DelColor::GREEN;
+            *port |= GREEN;
         else {
-            *port |= DelColor::RED;
+            *port |= RED;
         }
         val = !val;
     }

@@ -1,51 +1,23 @@
-#include <avr/io.h>
-#define F_CPU 8000000
-#include <avr/interrupt.h>
-#include <util/delay.h>
+#include "Utils.h"
 
-#define OFF   0
-#define GREEN 1
-#define RED   2
-#define AMBRE 3
-#define DIX_UNITE 50
-
-#define THRESHOLD 4
-#define JUMP      10
-
-enum PinState {
-    LOW, 
-    HIGH 
-};
-
-
-void setPinState(volatile uint8_t &port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
+void Utils::setPinState(volatile uint8_t *port, uint8_t pins[], PinState pinState[], uint8_t nbPins)
 {
     for(uint8_t i = 0; i < nbPins; i++)
     {
         if (pins[i] > 7) {
             continue; // Numéro de pin invalide, prochaine pin
         }
-        port = (pinState[i] == PinState::HIGH) ? port | _BV(pins[i]) : port & ~_BV(pins[i]);
+        setPinState(port, pins[i], pinState[i]);
     }
 }
 
-void setDELColor(uint8_t &port, uint8_t color)
+void Utils::setPinState(volatile uint8_t *port, uint8_t pin, PinState pinState)
 {
-    if (color == AMBRE)
-    {
-        static bool val = false;
-        if(val)
-            port = GREEN;
-        else {
-            port = RED;
-        }
-        val = !val;
-    }
-    else
-        port = color;
+    *port = (pinState == PinState::HIGH) ? *port | _BV(pin) : *port & ~_BV(pin);
 }
 
-void dynamic_delay_ms(uint16_t delay)
+/* 
+void Utils::dynamic_delay_ms(uint16_t delay)
 {
     if (delay < THRESHOLD)
     {
@@ -67,11 +39,10 @@ void dynamic_delay_ms(uint16_t delay)
     }
 
 }
+ */
 
-
-
-void allumerMatrice(uint8_t operande){
-    //Test
+void Utils::allumerMatrice(uint8_t operande){
+    /* //Test
     for(int i = 0; i < 3; i++){
         PORTA = 0x0F;
         _delay_ms(500);
@@ -80,45 +51,44 @@ void allumerMatrice(uint8_t operande){
     }
     for(int i = 0; i < 10; i++){
         PORTA = 0x00;
-        _delay_ms(DIX_UNITE);
+        _delay_ms(DELAY);
         PORTA = 0xE6;
-        _delay_ms(DIX_UNITE);
+        _delay_ms(DELAY);
         PORTA = 0xC6;
-        _delay_ms(DIX_UNITE);
+        _delay_ms(DELAY);
         PORTA = 0x86;
-        _delay_ms(DIX_UNITE);
+        _delay_ms(DELAY);
         PORTA = 0x06;
-        _delay_ms(DIX_UNITE);
-    } //Fin test
-  
+        _delay_ms(DELAY);
+    } //Fin test */
     PORTA = operande;
 }
 
 
-void eteindreMatrix(){
+void Utils::eteindreMatrix(){
     PORTA = 0x00;
 }
 
-void eteindreDirection() {
+void Utils::eteindreDirection() {
     PORTB = 0x00;
 }
 
-void matrix(uint8_t operande){
+void Utils::matrix(uint8_t operande){
     PORTA = operande;
 }
 
-void directionNord(){
+void Utils::directionNord(){
     PORTB = 0x34;
 }
 
-void directionSud(){
+void Utils::directionSud(){
     PORTB = 0x94;
 }
 
-void directionEst(){
+void Utils::directionEst(){
     PORTB = 0x4C;
 }
 
-void directionOuest(){
+void Utils::directionOuest(){
     PORTB = 0x58;
 }
