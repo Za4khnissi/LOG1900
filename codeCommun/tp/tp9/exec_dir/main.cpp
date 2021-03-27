@@ -86,7 +86,6 @@ int main() {
     
     //Test Del
     PORTB = 0x01;
-    PORTC = 0xat;
 
     UART uart;
 
@@ -124,6 +123,9 @@ int main() {
         //lecture de l'instruction
         instruction = eeprom_read_byte(compteurProg);
         compteurProg++;
+
+        //Afficheur 7segments
+        PORTC = instruction;
 
         //lecture de l'operande
         operande = eeprom_read_byte(compteurProg);

@@ -87,7 +87,7 @@ CFLAGS=-I. -I/usr/include/simavr  -MMD $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 	-Wall                                        
 
 # Flags pour le compilateur en C++
-CXXFLAGS=-fno-exceptions     
+CXXFLAGS=-fno-exceptions
 
 # Linker pour lier les librairies utilisees
 LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU)
@@ -106,9 +106,9 @@ MES_OPTIONS=-crs
 #Nom des cibles par defaut
 #TRG=$(PROJECTNAME).elf
 #.a pour la librairie statique **********************************
-HEXROMTRG=$(PROJECTNAME).hex
+#HEXROMTRG=$(PROJECTNAME).hex
 TRG=$(PROJECTNAME).a
-HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
+#HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
 
 
 
