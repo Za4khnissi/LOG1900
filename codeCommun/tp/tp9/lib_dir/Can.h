@@ -26,12 +26,12 @@
  *
  */
 
-class can
+class Can
 {
 public:
 
-   can();
-   ~can();
+   Can();
+   ~Can();
 
    // retourne la valeur numerique correspondant a la valeur
    // analogique sur le port A.  pos doit etre entre 0 et 7
