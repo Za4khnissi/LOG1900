@@ -246,3 +246,47 @@ int main() {
     }   
     //return 0;
 }
+
+
+/*void writeEEPROM(uint8_t *adress, uint8_t data){
+    data = 0x00;
+    do{
+        data = receiveUART();
+        eeprom_write_byte(adress, data);
+        adress++;
+    }while(data != FIN)
+}
+
+void readEEPROM (uint8_t* adress, uint8_t operand){
+    adress = 0x00; // initialisation de l'adresse pour commencer la lecture
+    while (eeprom_read_byte(adress) != DBT){ // boucle pour ignorer l'exception et pointer vers DBT
+        adress++; // apres la sortie du while adress pointe vers l'instruction 
+    }
+    while (eeprom_read_byte(adress) != FIN){ // debut de la lecture 
+        if (eeprom_read_byte(adress) == DBC){ // si l'instruction est un debut de boucle DBC
+
+            DEBUG_PRINT("Instruction: DBC\n", 17);
+            operands = eeprom_read_byte(adress + 1); // initialisation de la boucle
+            adress += 0x02; 
+            uint8_t counter = 0; // compteur pour verifier si le programme a executer toute les instructions entre DBC et FBC
+                do{
+                    if (eeprom_read_byte(adress) == FBC){ // 
+                        DEBUG_PRINT("Instruction: FBC\n", 17);
+                        do {
+                            adresse--; // retourner a l'adress de DBC
+                        }while(eeprom_read_byte(adress) != DBC);
+                        adress += 0x02; 
+                        counter++;                                              
+                    }                                                           
+                    readInstructions(adress);                                   
+                    adresse += 0x02;                                            
+
+                } while (counter != (operands + 1) ); 
+            }
+            readInstructions(adress);
+            adress += 0x02;
+        }
+    }
+    readInstruction(adress); // lire l'instruction FIN
+}
+*/
