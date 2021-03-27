@@ -1,4 +1,7 @@
-Changement fait le 26mars par moussa:
+//ce fichier sera effacé avant la remise du tp
+
+
+Changement:
 
 UART.h/cpp:
 	-Changer le namespace en une classe UART.
@@ -13,8 +16,9 @@ main.cpp (fichier principal)
 	-squelette du corps de notre programme.
 	
 Circuit du tp:
-	manque juste les 2 afficheurs de 7segments
+	-manque juste les 2 afficheurs de 7segments
 	
-=================================================================
+Utils.cpp:
+	-ajout de l'implementation de la matrix
 
 

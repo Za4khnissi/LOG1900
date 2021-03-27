@@ -84,6 +84,10 @@ int main() {
     DDRC = 0xff; // Port C en mode sortie
     DDRD = 0xff; // Port D en mode sortie
     
+    //Test Del
+    PORTB = 0x01;
+    PORTC = 0xat;
+
     UART uart;
 
     //Program counter
@@ -114,7 +118,6 @@ int main() {
     //dans le switch statement
     bool executionCode = false;
 
-    //Test Del
 
     for(uint16_t i = 0; i < instructionSize; i++){
 
@@ -159,14 +162,12 @@ int main() {
 
                 case mon:
                     DEBUG_PRINT(("Instruction allumer matrix Del...\n"));
-                    // A completer
-
+                    allumerMatrice(operande);
                     break;
 
                 case mof:
                     DEBUG_PRINT(("Instruction eteindre matrix Del...\n"));
-                    // A completer
-
+                    eteindreMatrix();
                     break;
 
                 case mar:
@@ -185,24 +186,35 @@ int main() {
                     DEBUG_PRINT(("Instruction avancer moteur...\n"));
                     // A completer
 
+                    eteindreDirection();
+                    directionNord();
+                    _delay_ms(3000);
                     break;
 
                 case mre:
                     DEBUG_PRINT(("Instruction reculer moteur...\n"));
                     // A completer
 
+                    eteindreDirection();
+                    directionSud();
+                    _delay_ms(3000);
                     break;
 
                 case trd:
                     DEBUG_PRINT(("Instruction tourner moteur a droite...\n"));
                     // A completer
-
+                    
+                    eteindreDirection();
+                    directionEst();
+                    _delay_ms(3000);
                     break;
 
                 case trg:
                     DEBUG_PRINT(("Instruction tourner moteur a gauche...\n"));
                     // A completer
 
+                    eteindreDirection();
+                    directionOuest();
                     break;
 
                 case dbc:
@@ -232,6 +244,5 @@ int main() {
             }
         }   
     }   
-
     //return 0;
-}   
+}

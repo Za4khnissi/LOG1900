@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#define F_CPU 8000000
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
@@ -6,6 +7,7 @@
 #define GREEN 1
 #define RED   2
 #define AMBRE 3
+#define DIX_UNITE 50
 
 #define THRESHOLD 4
 #define JUMP      10
@@ -64,4 +66,59 @@ void dynamic_delay_ms(uint16_t delay)
         }
     }
 
+}
+
+
+
+void allumerMatrice(uint8_t operande){
+    //Test
+    for(int i = 0; i < 3; i++){
+        PORTA = 0x0F;
+        _delay_ms(500);
+        PORTA = 0x00;
+        _delay_ms(500);
+    }
+    for(int i = 0; i < 10; i++){
+        PORTA = 0x00;
+        _delay_ms(DIX_UNITE);
+        PORTA = 0xE6;
+        _delay_ms(DIX_UNITE);
+        PORTA = 0xC6;
+        _delay_ms(DIX_UNITE);
+        PORTA = 0x86;
+        _delay_ms(DIX_UNITE);
+        PORTA = 0x06;
+        _delay_ms(DIX_UNITE);
+    } //Fin test
+  
+    PORTA = operande;
+}
+
+
+void eteindreMatrix(){
+    PORTA = 0x00;
+}
+
+void eteindreDirection() {
+    PORTB = 0x00;
+}
+
+void matrix(uint8_t operande){
+    PORTA = operande;
+}
+
+void directionNord(){
+    PORTB = 0x34;
+}
+
+void directionSud(){
+    PORTB = 0x94;
+}
+
+void directionEst(){
+    PORTB = 0x4C;
+}
+
+void directionOuest(){
+    PORTB = 0x58;
 }
