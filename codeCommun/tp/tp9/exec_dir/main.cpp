@@ -86,7 +86,7 @@ int main() {
     
     //Test Del
     PORTB = 0x01;
-    PORTC = 0xat;
+    PORTC = 0xaa;
 
     UART uart;
 
