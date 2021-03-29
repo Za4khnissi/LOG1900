@@ -7,16 +7,16 @@
 class Motor
 {
 private:
-    bool fwd = false;
+    bool fwd = true;
     
 public:
     Motor();
     ~Motor();
     void forward(uint8_t ocr1a, uint8_t ocr1b);
     void backward(uint8_t ocr1a, uint8_t ocr1b);
-    void turnLeft(uint8_t ocr1a, uint8_t ocr1b);
-    void turnRight(uint8_t ocr1a, uint8_t ocr1b);   
-    void stop(uint8_t ocr1a, uint8_t ocr1b);
+    void turnLeft();
+    void turnRight();   
+    void stop();
 };
 
 

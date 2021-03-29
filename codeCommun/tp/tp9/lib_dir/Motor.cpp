@@ -12,46 +12,45 @@ Motor::~Motor()
 void Motor::forward(uint8_t ocr1a, uint8_t ocr1b)
 {
     Motor::fwd = true;
-    PORTC |= _BV(PC0);
-    PORTC |= _BV(PC1);
+    PORTD |= _BV(PD6);
+    PORTD |= _BV(PD7);
     PWM::adjustPWM(ocr1a, ocr1b);
 }
+
 void Motor::backward(uint8_t ocr1a, uint8_t ocr1b)
 {
     Motor::fwd = false;
-    PORTC &= ~_BV(PC0);
-    PORTC &= ~_BV(PC1);
+    PORTD &= ~_BV(PD6);
+    PORTD &= ~_BV(PD7);
     PWM::adjustPWM(ocr1a, ocr1b);
 
 }
 
-void Motor::turnLeft(uint8_t ocr1a, uint8_t ocr1b)
+void Motor::turnLeft()
 {
     if(Motor::fwd) 
     {
-        PORTC |= _BV(PC0);
+        PORTD = _BV(PD7);
     }
     else {
-        PORTC &= ~_BV(PC0);
+        PORTD &= ~_BV(PD7);
     }
-    //PORTC |= _BV(PC1);
-    PWM::adjustPWM(ocr1a, ocr1b);
-
+    PWM::adjustPWM(125, 0);
 }
 
-void Motor::turnRight(uint8_t ocr1a, uint8_t ocr1b)
+void Motor::turnRight()
 {
     if(Motor::fwd) 
     {
-        PORTC |= _BV(PC1);
+        PORTD = _BV(PD6);
     }
     else {
-        PORTC &= ~_BV(PC1);
+        PORTD &= ~_BV(PD6);
     }
-    PWM::adjustPWM(ocr1a, ocr1b);
-
+    PWM::adjustPWM(0, 125);
 }   
-void Motor::stop(uint8_t ocr1a, uint8_t ocr1b)
+
+void Motor::stop()
 {
     PWM::adjustPWM(0, 0);
 }

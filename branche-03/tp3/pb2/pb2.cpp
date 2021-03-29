@@ -49,15 +49,11 @@ int main()
             {
                 PORTB = 0x01;       
                 for(uint8_t i = 0; i < c1 / 10; i++) 
-                {
                     _delay_us(10);
-                }
 
                 PORTB = 0x00;
                 for(uint8_t i = 0; i < a1 / 10; i++)
-                {
                     _delay_us(10);
-                }
             }
             a1 -= b1 / (nombreDeCycles - 1); 
         }
@@ -71,15 +67,11 @@ int main()
             {
                 PORTB = 0x03;
                 for(uint8_t i = 0; i < c2 / 10; i++) 
-                {
                     _delay_us(10);
-                }
 
                 PORTB = 0x00;
                 for(uint8_t i = 0; i < a2 / 10; i++)
-                {
                     _delay_us(10);
-                }
             }
             a2 -= b2 / (nombreDeCycles - 1); 
         }

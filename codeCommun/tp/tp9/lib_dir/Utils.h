@@ -30,4 +30,5 @@ namespace Utils
     void directionSud();
     void directionEst();
     void directionOuest();
-};   
+    void eteindreAfficheur();
+    };   

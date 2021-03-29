@@ -79,26 +79,25 @@ uint16_t receptionInstrustions() {
 }
 
 //Instruction: dal
-void allumerDEL(Led led, uint8_t operande){
+void allumerLed(Led led, uint8_t operande){
     if(operande <= 127){
-        led.setLedColor(&PORTA, GREEN);
+        led.setLedColor(&PORTB, GREEN);
     }
     else {
-        led.setLedColor(&PORTA, RED);
+        led.setLedColor(&PORTB, RED);
 
     }
 }
 
 //Instruction: det
-void eteindreDEL(Led led){
-    led.setLedColor(&PORTA, OFF);
+void eteindreLed(Led led){
+    led.setLedColor(&PORTB, OFF);
 }
 
 //Instruction: att
 void attendre(uint8_t operande) {
     _delay_ms(25*operande);
 }
-
 
 int main() {
 
@@ -107,10 +106,10 @@ int main() {
     DDRB = 0xff; // Port B en mode sortie
     DDRC = 0xff; // Port C en mode sortie
     DDRD = 0xff; // Port D en mode sortie
-    
+
     //Test Del
     Led led;
-    led.setLedColor(&PORTB, GREEN);
+    //led.setLedColor(&PORTB, GREEN);
     //PORTC = 0xaa;
 
     Motor motor;
@@ -152,8 +151,8 @@ int main() {
         compteurProg++;
 
         //Afficheur 7segments
-        //PORTC = instruction; ---> affichage de l instruction courante
-
+        PORTC = instruction; //---> affichage de l instruction courante
+        _delay_ms(1000);
         //lecture de l'operande
         operande = eeprom_read_byte(compteurProg);
         compteurProg++;
@@ -180,15 +179,13 @@ int main() {
 
                 case DAL:
                     DEBUG_PRINT(("Instruction allumer Del...\n"));
-                    allumerDEL(led, 143);
-                
-
+                    allumerLed(led, operande);
                     break;
 
                 case DET:
                     DEBUG_PRINT(("Instruction eteindre Del...\n"));
                     // A completer
-                    eteindreDEL(led);
+                    eteindreLed(led);
 
                     break;
 
@@ -208,7 +205,7 @@ int main() {
                     // A completer
                     if(operande == 0x60 || operande == 0x61) {
 
-                        motor.stop(0, 0);
+                        motor.stop();
                     }
                     break;
 
@@ -233,7 +230,7 @@ int main() {
                 case TRD:
                     DEBUG_PRINT(("Instruction tourner moteur a droite...\n"));
                     // A completer
-                    motor.turnRight(operande, 0);
+                    motor.turnRight();
                     
                     Utils::eteindreDirection();
                     Utils::directionEst();
@@ -242,7 +239,7 @@ int main() {
                 case TRG:
                     DEBUG_PRINT(("Instruction tourner moteur a gauche...\n"));
                     // A completer
-                    motor.turnLeft(0, operande);
+                    motor.turnLeft();
 
                     Utils::eteindreDirection();
                     Utils::directionOuest();
@@ -251,7 +248,7 @@ int main() {
                 case DBC:
                     DEBUG_PRINT(("Instruction debut boucle...\n"));
                     //compteurProg nous indique l'adresse du debut de la boucle
-                    adressBoucle = compteurProg + UNE_FOIS;
+                    adressBoucle = compteurProg; //+ UNE_FOIS;
                     //on met dans compteurBoucle le nombre d'iteration de la boucle plus une fois
                     compteurBoucle = operande + UNE_FOIS;
                     break;
@@ -259,8 +256,8 @@ int main() {
                 case FBC:
                     DEBUG_PRINT(("Instruction fin boucle...\n"));
                     //On verifie si le nombre d'iteration est termine
-                    if(compteurBoucle > 0){
-                        compteurProg = adressBoucle;
+                    if(compteurBoucle > 0) {
+                        compteurProg = adressBoucle; // Revenir a DBC
                         compteurBoucle--;
                     }
                     break;
@@ -268,8 +265,12 @@ int main() {
                 case FIN:
                     DEBUG_PRINT(("Instruction fin tout court...\n"));
                     //A completer si possible sinon un return 0 suffira
-                    motor.stop(0, 0);
+                    motor.stop();
                     Utils::eteindreDirection();
+                    Utils::eteindreMatrix();
+                    _delay_ms(2000);
+                    Utils::eteindreAfficheur();
+                    eteindreLed(led);
                     return 0;
                     break;    
 

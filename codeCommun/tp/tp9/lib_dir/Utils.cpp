@@ -70,25 +70,29 @@ void Utils::eteindreMatrix(){
 }
 
 void Utils::eteindreDirection() {
-    PORTB = 0x00;
+    PORTB &= ~_BV(PB2) & ~_BV(PB3) & ~_BV(PB4) & ~_BV(PB5) & ~_BV(PB6) & ~_BV(PB7);
 }
 
 void Utils::matrix(uint8_t operande){
     PORTA = operande;
 }
 
-void Utils::directionNord(){
-    PORTB = 0x34;
+void Utils::directionNord() {
+    PORTB |= 0x34; // 0011 0100
 }
 
 void Utils::directionSud(){
-    PORTB = 0x94;
+    PORTB |= 0x94; // 1001 0100
 }
 
-void Utils::directionEst(){
-    PORTB = 0x4C;
+void Utils::directionEst() {
+    PORTB |= 0x4C; // 0100 1100
 }
 
-void Utils::directionOuest(){
-    PORTB = 0x58;
+void Utils::directionOuest() {
+    PORTB |= 0x58; // 0101 1000
+}
+
+void Utils::eteindreAfficheur() {
+    PORTC = 0x00;
 }

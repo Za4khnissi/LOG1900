@@ -3,7 +3,7 @@
 Led::Led()
 {
 }
-
+// 0000 0110
 Led::~Led()
 {
 }
@@ -20,5 +20,5 @@ void Led::setLedColor(volatile uint8_t *port, uint8_t color)
         val = !val;
     }
     else
-        *port |= color;
+        *port = color;  
 }
