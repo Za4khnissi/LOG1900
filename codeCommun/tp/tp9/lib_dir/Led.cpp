@@ -1,14 +1,14 @@
-#include "Del.h"
+#include "Led.h"
 
-Del::Del()
+Led::Led()
 {
 }
 
-Del::~Del()
+Led::~Led()
 {
 }
 
-void Del::setDelColor(volatile uint8_t *port, uint8_t color)
+void Led::setLedColor(volatile uint8_t *port, uint8_t color)
 {
     if (color == AMBRE)
     {

@@ -4,14 +4,14 @@
 #include <avr/io.h>
 #include "PWM.h"
 
-class Wheel
+class Motor
 {
 private:
     bool fwd = false;
     
 public:
-    Wheel();
-    ~Wheel();
+    Motor();
+    ~Motor();
     void forward(uint8_t ocr1a, uint8_t ocr1b);
     void backward(uint8_t ocr1a, uint8_t ocr1b);
     void turnLeft(uint8_t ocr1a, uint8_t ocr1b);
@@ -19,13 +19,6 @@ public:
     void stop(uint8_t ocr1a, uint8_t ocr1b);
 };
 
-Wheel::Wheel()
-{
-}
-
-Wheel::~Wheel()
-{
-}
 
 
 #endif //WHEEL_H

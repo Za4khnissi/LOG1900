@@ -6,8 +6,8 @@
 
 #include "UART.h"
 #include "debug.h"
-#include "Wheel.h"
-#include "Del.h"
+#include "Motor.h"
+#include "Led.h"
 #include "Utils.h"
 
 #define UNE_FOIS 1
@@ -40,6 +40,7 @@ enum Instruction {
  * fonction qui recoit les instructions de Uart pour l'ecrire sur la memoire
  */
 uint16_t receptionInstrustions() {
+    
     UART uart;
 
     uint8_t* address = 0x00;
@@ -78,19 +79,19 @@ uint16_t receptionInstrustions() {
 }
 
 //Instruction: dal
-void allumerDEL(Del del, uint8_t operande){
+void allumerDEL(Led led, uint8_t operande){
     if(operande <= 127){
-        del.setDelColor(&PORTA, GREEN);
+        led.setLedColor(&PORTA, GREEN);
     }
     else {
-        del.setDelColor(&PORTA, RED);
+        led.setLedColor(&PORTA, RED);
 
     }
 }
 
 //Instruction: det
-void eteindreDEL(Del del){
-    del.setDelColor(&PORTA, OFF);
+void eteindreDEL(Led led){
+    led.setLedColor(&PORTA, OFF);
 }
 
 //Instruction: att
@@ -108,10 +109,11 @@ int main() {
     DDRD = 0xff; // Port D en mode sortie
     
     //Test Del
-    PORTB = 0x01;
-    PORTC = 0xaa;
+    Led led;
+    led.setLedColor(&PORTB, GREEN);
+    //PORTC = 0xaa;
 
-
+    Motor motor;
     UART uart;
 
     //Program counter
@@ -124,7 +126,7 @@ int main() {
     uint8_t compteurBoucle;
 
     //Variable qui stocke la valeur retourne lors de la lecture de EEPROM
-    uint8_t instruction;
+    uint8_t instruction = 0;
 
     //Variable qui stock l'operande qui suit l'instruction
     uint8_t operande = 0;
@@ -150,7 +152,7 @@ int main() {
         compteurProg++;
 
         //Afficheur 7segments
-        PORTC = instruction;
+        //PORTC = instruction; ---> affichage de l instruction courante
 
         //lecture de l'operande
         operande = eeprom_read_byte(compteurProg);
@@ -171,19 +173,22 @@ int main() {
 
                 case ATT:
                     DEBUG_PRINT(("Instruction attendre...\n"));
+                    attendre(operande);
                     // A completer
 
                     break;
 
                 case DAL:
                     DEBUG_PRINT(("Instruction allumer Del...\n"));
-                    // A completer
+                    allumerDEL(led, 143);
+                
 
                     break;
 
                 case DET:
                     DEBUG_PRINT(("Instruction eteindre Del...\n"));
                     // A completer
+                    eteindreDEL(led);
 
                     break;
 
@@ -198,20 +203,19 @@ int main() {
                     break;
 
                 case MAR:
-                    DEBUG_PRINT(("Instruction arreter moteur...\n"));
-                    // A completer
-
-                    break;
-
                 case MBR:
                     DEBUG_PRINT(("Instruction arreter moteur...\n"));
                     // A completer
+                    if(operande == 0x60 || operande == 0x61) {
 
+                        motor.stop(0, 0);
+                    }
                     break;
 
                 case MAV:
                     DEBUG_PRINT(("Instruction avancer moteur...\n"));
                     // A completer
+                    motor.forward(operande, operande);
 
                     Utils::eteindreDirection();
                     Utils::directionNord();
@@ -220,6 +224,7 @@ int main() {
                 case MRE:
                     DEBUG_PRINT(("Instruction reculer moteur...\n"));
                     // A completer
+                    motor.backward(operande, operande);
 
                     Utils::eteindreDirection();
                     Utils::directionSud();
@@ -228,6 +233,7 @@ int main() {
                 case TRD:
                     DEBUG_PRINT(("Instruction tourner moteur a droite...\n"));
                     // A completer
+                    motor.turnRight(operande, 0);
                     
                     Utils::eteindreDirection();
                     Utils::directionEst();
@@ -236,6 +242,7 @@ int main() {
                 case TRG:
                     DEBUG_PRINT(("Instruction tourner moteur a gauche...\n"));
                     // A completer
+                    motor.turnLeft(0, operande);
 
                     Utils::eteindreDirection();
                     Utils::directionOuest();
@@ -261,7 +268,8 @@ int main() {
                 case FIN:
                     DEBUG_PRINT(("Instruction fin tout court...\n"));
                     //A completer si possible sinon un return 0 suffira
-
+                    motor.stop(0, 0);
+                    Utils::eteindreDirection();
                     return 0;
                     break;    
 

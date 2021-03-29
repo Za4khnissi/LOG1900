@@ -1,23 +1,33 @@
-#include "Wheel.h"
+#include "Motor.h"
 
-void Wheel::forward(uint8_t ocr1a, uint8_t ocr1b)
+
+Motor::Motor()
 {
-    Wheel::fwd = true;
+}
+
+Motor::~Motor()
+{
+}
+
+void Motor::forward(uint8_t ocr1a, uint8_t ocr1b)
+{
+    Motor::fwd = true;
     PORTC |= _BV(PC0);
     PORTC |= _BV(PC1);
     PWM::adjustPWM(ocr1a, ocr1b);
 }
-void Wheel::backward(uint8_t ocr1a, uint8_t ocr1b)
+void Motor::backward(uint8_t ocr1a, uint8_t ocr1b)
 {
-    Wheel::fwd = false;
+    Motor::fwd = false;
     PORTC &= ~_BV(PC0);
     PORTC &= ~_BV(PC1);
     PWM::adjustPWM(ocr1a, ocr1b);
 
 }
-void Wheel::turnLeft(uint8_t ocr1a, uint8_t ocr1b)
+
+void Motor::turnLeft(uint8_t ocr1a, uint8_t ocr1b)
 {
-    if(Wheel::fwd) 
+    if(Motor::fwd) 
     {
         PORTC |= _BV(PC0);
     }
@@ -28,9 +38,10 @@ void Wheel::turnLeft(uint8_t ocr1a, uint8_t ocr1b)
     PWM::adjustPWM(ocr1a, ocr1b);
 
 }
-void Wheel::turnRight(uint8_t ocr1a, uint8_t ocr1b)
+
+void Motor::turnRight(uint8_t ocr1a, uint8_t ocr1b)
 {
-    if(Wheel::fwd) 
+    if(Motor::fwd) 
     {
         PORTC |= _BV(PC1);
     }
@@ -40,7 +51,7 @@ void Wheel::turnRight(uint8_t ocr1a, uint8_t ocr1b)
     PWM::adjustPWM(ocr1a, ocr1b);
 
 }   
-void Wheel::stop(uint8_t ocr1a, uint8_t ocr1b)
+void Motor::stop(uint8_t ocr1a, uint8_t ocr1b)
 {
     PWM::adjustPWM(0, 0);
 }
