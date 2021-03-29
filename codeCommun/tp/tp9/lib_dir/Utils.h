@@ -21,14 +21,13 @@ namespace Utils
 {
     void setPinState(volatile uint8_t *port, uint8_t pins[], PinState pinState[], uint8_t nbPins);
     void setPinState(volatile uint8_t *port, uint8_t pin, PinState pinState);
-    //void dynamic_delay_ms(uint16_t delay);
-    void allumerMatrice(uint8_t operande);
-    void eteindreMatrix();
-    void eteindreDirection();
-    void matrix(uint8_t operande);
-    void directionNord();
-    void directionSud();
-    void directionEst();
-    void directionOuest();
-    void eteindreAfficheur();
+    void dynamic_delay_ms(uint16_t delay);
+    void turnOnMatrix(uint8_t operand);
+    void turnOffMatrix();
+    void turnOffDirection();
+    void directionNorth();
+    void directionSouth();
+    void directionEast();
+    void directionWest();
+    void turnOffDisplay();
     };   

@@ -10,7 +10,7 @@
 #include "Led.h"
 #include "Utils.h"
 
-#define UNE_FOIS 1
+#define ONE_ 1
 
 enum Instruction {
 
@@ -39,7 +39,7 @@ enum Instruction {
 /**
  * fonction qui recoit les instructions de Uart pour l'ecrire sur la memoire
  */
-uint16_t receptionInstrustions() {
+uint16_t receiveInstructions() {
     
     UART uart;
 
@@ -49,21 +49,21 @@ uint16_t receptionInstrustions() {
     //Test Del
 
     //
-    uint8_t octet1 = uart.receive();
+    uint8_t byte1 = uart.receive();
     
     //on ecrit le premier octet recu depuis le UART sur la memoire eeprom
-    eeprom_write_byte(address, octet1);
+    eeprom_write_byte(address, byte1);
     address++;
 
     //On recoit maintenant le 2e octet de UART
-    uint8_t octet2 = uart.receive();
+    uint8_t byte2 = uart.receive();
 
     //on ecrit le deuxieme octet recu depuis le UART sur la memoire eeprom
-    eeprom_write_byte(address, octet2);
+    eeprom_write_byte(address, byte2);
     address++;
 
     //le nombre d'instruction sont stocke dans instructionSize
-    instructionSize = ((octet1 << 8) | octet2);
+    instructionSize = ((byte1 << 8) | byte2);
 
     for(uint16_t i = 2; i < instructionSize; i++) {
         //Donnee recue de UART (1byte)
@@ -79,8 +79,8 @@ uint16_t receptionInstrustions() {
 }
 
 //Instruction: dal
-void allumerLed(Led led, uint8_t operande){
-    if(operande <= 127){
+void turnOnLED(Led led, uint8_t operand){
+    if(operand <= 127){
         led.setLedColor(&PORTB, GREEN);
     }
     else {
@@ -90,13 +90,13 @@ void allumerLed(Led led, uint8_t operande){
 }
 
 //Instruction: det
-void eteindreLed(Led led){
+void turnOffLED(Led led){
     led.setLedColor(&PORTB, OFF);
 }
 
 //Instruction: att
-void attendre(uint8_t operande) {
-    _delay_ms(25*operande);
+void attendre(uint8_t operand) {
+    _delay_ms(25*operand);
 }
 
 int main() {
@@ -116,24 +116,24 @@ int main() {
     UART uart;
 
     //Program counter
-    uint8_t* compteurProg = 0x00;
+    uint8_t* programCounter = 0x00;
 
     //adresse de la boucle
-    uint8_t* adressBoucle;
+    uint8_t* loopAdress;
 
     //compteur de boucle
-    uint8_t compteurBoucle;
+    uint8_t loopCounter = 0;
 
     //Variable qui stocke la valeur retourne lors de la lecture de EEPROM
     uint8_t instruction = 0;
 
-    //Variable qui stock l'operande qui suit l'instruction
-    uint8_t operande = 0;
+    //Variable qui stock l'operand qui suit l'instruction
+    uint8_t operand = 0;
 
-    //Ici on fait appel a la fonction receptionInstrustions 
+    //Ici on fait appel a la fonction receiveInstructions 
     //qui ecrit les donnees recues par UART sur la memoire
     //et par la suite nous retourne la taille des instructions
-    uint16_t instructionSize = receptionInstrustions();
+    uint16_t instructionSize = receiveInstructions();
 
     //instanciation des objets le cas echeants
     
@@ -141,21 +141,21 @@ int main() {
     //variable boolenne retournant le debut de l'execution des instructions
     //pour verifier si l'instruction dbt(debut) est executee avant de rentrer
     //dans le switch statement
-    bool executionCode = false;
+    bool execCode = false;
 
 
     for(uint16_t i = 0; i < instructionSize; i++){
 
         //lecture de l'instruction
-        instruction = eeprom_read_byte(compteurProg);
-        compteurProg++;
+        instruction = eeprom_read_byte(programCounter);
+        programCounter++;
 
         //Afficheur 7segments
-        PORTC = instruction; //---> affichage de l instruction courante
+        PORTC = instruction; //affichage de l instruction courante
         _delay_ms(1000);
-        //lecture de l'operande
-        operande = eeprom_read_byte(compteurProg);
-        compteurProg++;
+
+        operand = eeprom_read_byte(programCounter);
+        programCounter++;
 
         //on transmet vers pc l'instruction lue
         uart.transmissionUART(instruction);
@@ -163,47 +163,44 @@ int main() {
         //on verifie si l'instruction est debut avant de rentrer 
         //dans le switch statement dans la premiere fois sinon on fait rien
         if(instruction == DBT)
-            executionCode = true;
+            execCode = true;
 
 
-        if(executionCode){
+        if(execCode){
 
             switch (instruction) {
 
                 case ATT:
                     DEBUG_PRINT(("Instruction attendre...\n"));
-                    attendre(operande);
-                    // A completer
+                    attendre(operand);
 
                     break;
 
                 case DAL:
                     DEBUG_PRINT(("Instruction allumer Del...\n"));
-                    allumerLed(led, operande);
+                    turnOnLED(led, operand);
                     break;
 
                 case DET:
                     DEBUG_PRINT(("Instruction eteindre Del...\n"));
-                    // A completer
-                    eteindreLed(led);
+                    turnOffLED(led);
 
                     break;
 
                 case MON:
                     DEBUG_PRINT(("Instruction allumer matrix Del...\n"));
-                    Utils::allumerMatrice(operande);
+                    Utils::turnOnMatrix(operand);
                     break;
 
                 case MOF:
                     DEBUG_PRINT(("Instruction eteindre matrix Del...\n"));
-                    Utils::eteindreMatrix();
+                    Utils::turnOffMatrix();
                     break;
 
                 case MAR:
                 case MBR:
                     DEBUG_PRINT(("Instruction arreter moteur...\n"));
-                    // A completer
-                    if(operande == 0x60 || operande == 0x61) {
+                    if(operand == 0x60 || operand == 0x61) {
 
                         motor.stop();
                     }
@@ -211,66 +208,61 @@ int main() {
 
                 case MAV:
                     DEBUG_PRINT(("Instruction avancer moteur...\n"));
-                    // A completer
-                    motor.forward(operande, operande);
+                    motor.forward(operand, operand);
 
-                    Utils::eteindreDirection();
-                    Utils::directionNord();
+                    Utils::turnOffDirection();
+                    Utils::directionNorth();
                     break;
 
                 case MRE:
                     DEBUG_PRINT(("Instruction reculer moteur...\n"));
-                    // A completer
-                    motor.backward(operande, operande);
+                    motor.backward(operand, operand);
 
-                    Utils::eteindreDirection();
-                    Utils::directionSud();
+                    Utils::turnOffDirection();
+                    Utils::directionSouth();
                     break;
 
                 case TRD:
                     DEBUG_PRINT(("Instruction tourner moteur a droite...\n"));
-                    // A completer
                     motor.turnRight();
                     
-                    Utils::eteindreDirection();
-                    Utils::directionEst();
+                    Utils::turnOffDirection();
+                    Utils::directionEast();
                     break;
 
                 case TRG:
                     DEBUG_PRINT(("Instruction tourner moteur a gauche...\n"));
-                    // A completer
                     motor.turnLeft();
 
-                    Utils::eteindreDirection();
-                    Utils::directionOuest();
+                    Utils::turnOffDirection();
+                    Utils::directionWest();
                     break;
 
                 case DBC:
                     DEBUG_PRINT(("Instruction debut boucle...\n"));
-                    //compteurProg nous indique l'adresse du debut de la boucle
-                    adressBoucle = compteurProg; //+ UNE_FOIS;
-                    //on met dans compteurBoucle le nombre d'iteration de la boucle plus une fois
-                    compteurBoucle = operande + UNE_FOIS;
+                    //programCounter nous indique l'adresse du debut de la boucle
+                    loopAdress = programCounter;
+                    //on met dans loopCounter le nombre d'iteration de la boucle plus une fois
+                    loopCounter = operand + ONE_;
                     break;
 
                 case FBC:
                     DEBUG_PRINT(("Instruction fin boucle...\n"));
                     //On verifie si le nombre d'iteration est termine
-                    if(compteurBoucle > 0) {
-                        compteurProg = adressBoucle; // Revenir a DBC
-                        compteurBoucle--;
+                    if(loopCounter > 0) {
+                        programCounter = loopAdress; // Revenir a l'adresse de DBC
+                        loopCounter--;
                     }
                     break;
 
                 case FIN:
                     DEBUG_PRINT(("Instruction fin tout court...\n"));
-                    //A completer si possible sinon un return 0 suffira
                     motor.stop();
-                    Utils::eteindreDirection();
-                    Utils::eteindreMatrix();
+                    Utils::turnOffDirection();
+                    Utils::turnOffMatrix();
                     _delay_ms(2000);
-                    Utils::eteindreAfficheur();
-                    eteindreLed(led);
+                    Utils::turnOffDisplay();
+                    turnOffLED(led);
                     return 0;
                     break;    
 
@@ -281,45 +273,3 @@ int main() {
 }
 
 
-/*void writeEEPROM(uint8_t *adress, uint8_t data){
-    data = 0x00;
-    do{
-        data = receiveUART();
-        eeprom_write_byte(adress, data);
-        adress++;
-    }while(data != FIN)
-}
-
-void readEEPROM (uint8_t* adress, uint8_t operand){
-    adress = 0x00; // initialisation de l'adresse pour commencer la lecture
-    while (eeprom_read_byte(adress) != DBT){ // boucle pour ignorer l'exception et pointer vers DBT
-        adress++; // apres la sortie du while adress pointe vers l'instruction 
-    }
-    while (eeprom_read_byte(adress) != FIN){ // debut de la lecture 
-        if (eeprom_read_byte(adress) == DBC){ // si l'instruction est un debut de boucle DBC
-
-            DEBUG_PRINT("Instruction: DBC\n", 17);
-            operands = eeprom_read_byte(adress + 1); // initialisation de la boucle
-            adress += 0x02; 
-            uint8_t counter = 0; // compteur pour verifier si le programme a executer toute les instructions entre DBC et FBC
-                do{
-                    if (eeprom_read_byte(adress) == FBC){ // 
-                        DEBUG_PRINT("Instruction: FBC\n", 17);
-                        do {
-                            adresse--; // retourner a l'adress de DBC
-                        }while(eeprom_read_byte(adress) != DBC);
-                        adress += 0x02; 
-                        counter++;                                              
-                    }                                                           
-                    readInstructions(adress);                                   
-                    adresse += 0x02;                                            
-
-                } while (counter != (operands + 1) ); 
-            }
-            readInstructions(adress);
-            adress += 0x02;
-        }
-    }
-    readInstruction(adress); // lire l'instruction FIN
-}
-*/

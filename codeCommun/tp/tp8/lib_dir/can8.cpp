@@ -10,7 +10,7 @@
  *
  */
 
-#include "can.h"
+#include "can8.h"
 
 // constructeur: initialisation du convertisseur
 can::can()

@@ -1,4 +1,4 @@
-#include "Button.h"
+#include "Button8.h"
 
 // constructeur : met la broche sur laquelle le bouton est connecté en entrée
 Button::Button(volatile uint8_t &DDRx, uint8_t pin)

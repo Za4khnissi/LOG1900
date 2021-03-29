@@ -16,7 +16,7 @@ void Utils::setPinState(volatile uint8_t *port, uint8_t pin, PinState pinState)
     *port = (pinState == PinState::HIGH) ? *port | _BV(pin) : *port & ~_BV(pin);
 }
 
-/* 
+
 void Utils::dynamic_delay_ms(uint16_t delay)
 {
     if (delay < THRESHOLD)
@@ -39,9 +39,8 @@ void Utils::dynamic_delay_ms(uint16_t delay)
     }
 
 }
- */
 
-void Utils::allumerMatrice(uint8_t operande){
+void Utils::turnOnMatrix(uint8_t operande){
     /* //Test
     for(int i = 0; i < 3; i++){
         PORTA = 0x0F;
@@ -65,34 +64,30 @@ void Utils::allumerMatrice(uint8_t operande){
 }
 
 
-void Utils::eteindreMatrix(){
+void Utils::turnOffMatrix(){
     PORTA = 0x00;
 }
 
-void Utils::eteindreDirection() {
+void Utils::turnOffDirection() {
     PORTB &= ~_BV(PB2) & ~_BV(PB3) & ~_BV(PB4) & ~_BV(PB5) & ~_BV(PB6) & ~_BV(PB7);
 }
 
-void Utils::matrix(uint8_t operande){
-    PORTA = operande;
+void Utils::directionNorth() {
+    PORTB |= _BV(PB2) | _BV(PB4) | _BV(PB5); // 0011 0100
 }
 
-void Utils::directionNord() {
-    PORTB |= 0x34; // 0011 0100
+void Utils::directionSouth(){
+    PORTB |= _BV(PB2) | _BV(PB4) | _BV(PB7); // 1001 0100
 }
 
-void Utils::directionSud(){
-    PORTB |= 0x94; // 1001 0100
+void Utils::directionEast() {
+    PORTB |= _BV(PB2) | _BV(PB3) | _BV(PB6); // 0100 1100
 }
 
-void Utils::directionEst() {
-    PORTB |= 0x4C; // 0100 1100
+void Utils::directionWest() {
+    PORTB |= _BV(PB3) | _BV(PB4) | _BV(PB6); // 0101 1000
 }
 
-void Utils::directionOuest() {
-    PORTB |= 0x58; // 0101 1000
-}
-
-void Utils::eteindreAfficheur() {
+void Utils::turnOffDisplay() {
     PORTC = 0x00;
 }

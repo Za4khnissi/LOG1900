@@ -1,4 +1,4 @@
-#include "PWM.h"
+#include "PWM8.h"
 
 
 void PWM::adjustPWM(uint8_t duration){

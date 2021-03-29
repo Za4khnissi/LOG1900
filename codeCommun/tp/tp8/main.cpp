@@ -38,7 +38,7 @@ Etat present    Entree D2  Entree D3   Etat suivant       Sortie
 #include <avr/io.h>
 #define F_CPU 8000000
 #include <util/delay.h>
-#include "debug.h"
+#include "debug8.h"
 
 
 #define ANTIREBOND 10
