@@ -128,11 +128,12 @@ void readEEPROM(uint16_t instructionSize){
 
         uart.transmissionUART(instruction);
 
-        if(instruction == DBT)
+        if(instruction == DBT) {
             DEBUG_PRINT("Instruction: DBT\n", 18);
             startCode = true;
+        }   
 
-        if(startCode){
+        if(startCode) {
 
             switch (instruction) {
 
@@ -228,7 +229,7 @@ void readEEPROM(uint16_t instructionSize){
                     _delay_ms(2000);
                     Utils::turnOffDisplay();
                     turnOffLED(led);
-                    break;    
+                    return;
             }
         }   
     }
@@ -238,9 +239,11 @@ void readEEPROM(uint16_t instructionSize){
 
 
 int main() {
+
     bool output = true;
     //Initialisation des entrees/sorties
     Utils::setAllDDR(output);
+
     //Ici on fait appel a la fonction receiveInstructions 
     //qui ecrit les donnees recues par UART sur la memoire
     //et par la suite nous retourne la taille des instructions

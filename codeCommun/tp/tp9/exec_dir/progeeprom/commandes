@@ -1,24 +1,13 @@
-DBT;
-
-DBC 1;
+DAL 23;
+ATT 20;
 DAL 123;
-DET;
-FBC;
+ATT 12;
 
-
-DBC 1;
-MAV 234;
-ATT 50;
-TRG;
-ATT 50;
-MRE 234;
-ATT 50;
-MAR; 
-ATT 50;
-FBC;
-
-DAL 250;
-ATT 5;
-
+# Commencer les executions
+DBT;
+//debut du trajet: affichage matrice
+MON 6;
+ATT 10;
+MON 1;
+ATT 23;
 FIN;
-
