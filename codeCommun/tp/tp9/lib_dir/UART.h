@@ -8,7 +8,8 @@ public:
     UART();
     ~UART();
     void transmissionUART(uint8_t data);
-    uint8_t receive();
+    void transmissionMessage(const char message[], uint8_t taille);
+    uint8_t receiveUART();
 
 };
 

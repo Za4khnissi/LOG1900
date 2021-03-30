@@ -16,6 +16,22 @@ void Utils::setPinState(volatile uint8_t *port, uint8_t pin, PinState pinState)
     *port = (pinState == PinState::HIGH) ? *port | _BV(pin) : *port & ~_BV(pin);
 }
 
+void Utils::setAllDDR(bool output){
+    if (output){
+        DDRA = 0xff; 
+        DDRB = 0xff; 
+        DDRC = 0xff; 
+        DDRD = 0xff; 
+    }
+    else{
+        DDRA = 0x00; 
+        DDRB = 0x00; 
+        DDRC = 0x00; 
+        DDRD = 0x00; 
+    }
+}
+
+
 
 void Utils::dynamic_delay_ms(uint16_t delay)
 {
@@ -77,7 +93,7 @@ void Utils::directionNorth() {
 }
 
 void Utils::directionSouth(){
-    PORTB |= _BV(PB2) | _BV(PB4) | _BV(PB7); // 1001 0100
+    PORTB |= _BV(PB2) | _BV(PB4) | _BV(PB7); // 1001 0100 
 }
 
 void Utils::directionEast() {

@@ -1,8 +1,24 @@
 DBT;
+
+DBC 1;
 DAL 123;
-ATT 100;
+DET;
+FBC;
+
+
+DBC 1;
 MAV 234;
-ATT 100;
-MAR;
+ATT 50;
+TRG;
+ATT 50;
+MRE 234;
+ATT 50;
+MAR; 
+ATT 50;
+FBC;
+
+DAL 250;
+ATT 5;
+
 FIN;
 

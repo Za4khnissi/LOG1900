@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define F_CPU 8000000
+#define F_CPU 8000000UL
 
 namespace timer
 {

@@ -1,6 +1,8 @@
 #include "debug.h"
 
-void initialisationUART() {
+
+
+/*void initialisationUART() {
     
     // 2400 bauds. Nous vous donnons la valeur des deux
     // premier registres pour vous éviter des complications
@@ -13,7 +15,7 @@ void initialisationUART() {
     
     // Format des trames: 8 bits, 1 stop bits, none parity
     UCSR0C = 1 << UCSZ01 | 1 << UCSZ00;
-}
+}*/
 
 //methode qui envoie les donnees par le port serie de RS232
 void transmissionUART(unsigned char data) {

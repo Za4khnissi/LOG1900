@@ -3,19 +3,21 @@
 #include <avr/io.h>
 #include <avr/eeprom.h>
 
-//#define DEBUG // à mettre en commentaire au besoin
 
 #ifdef DEBUG
+
 UART uart;
 
-//#define INIT_DEBUG initialisationUART()
-//DEBUG_PRINT(x, y) transmissionMessage(x, y) // ou par RS-232
-#define DEBUG_PRINT( str);for (uint8_t i=0; i<strlen(str);i++){uart.transmissionUART(str[i]);}
+#define INIT_DEBUG UART uart
+#define DEBUG_PRINT(x, y) uart.transmissionMessage(x, y) // ou par RS-232
 
 #else
 
-//#define INIT_DEBUG do {} while (0)
-#define DEBUG_PRINT(str) do {} while (0) 
+#define INIT_DEBUG do {} while (0)
+#define DEBUG_PRINT(x, y) do {} while (0) 
 
 #endif
+
+
+
 

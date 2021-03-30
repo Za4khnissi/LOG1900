@@ -35,7 +35,7 @@ void Motor::turnLeft()
     else {
         PORTD &= ~_BV(PD7);
     }
-    PWM::adjustPWM(125, 0);
+    PWM::adjustPWM(254, 0);
 }
 
 void Motor::turnRight()
@@ -47,7 +47,7 @@ void Motor::turnRight()
     else {
         PORTD &= ~_BV(PD6);
     }
-    PWM::adjustPWM(0, 125);
+    PWM::adjustPWM(0, 254);
 }   
 
 void Motor::stop()

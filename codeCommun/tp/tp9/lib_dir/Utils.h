@@ -21,6 +21,7 @@ namespace Utils
 {
     void setPinState(volatile uint8_t *port, uint8_t pins[], PinState pinState[], uint8_t nbPins);
     void setPinState(volatile uint8_t *port, uint8_t pin, PinState pinState);
+    void setAllDDR(bool output);
     void dynamic_delay_ms(uint16_t delay);
     void turnOnMatrix(uint8_t operand);
     void turnOffMatrix();

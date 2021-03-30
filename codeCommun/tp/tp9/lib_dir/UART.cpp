@@ -26,9 +26,16 @@ void UART::transmissionUART(uint8_t data) {
 }
 
 //methode qui retourne les donnees reçues
-uint8_t UART::receive() {
+uint8_t UART::receiveUART() {
     /* Wait for data to be received */
     while (!(UCSR0A & (1<<RXC0))){ 
     }
     return UDR0;
+}
+
+void UART::transmissionMessage(const char message[], uint8_t taille)
+{
+    for ( uint8_t i = 0; i < taille ; i++ ) {
+        transmissionUART( message[i] );
+    }
 }
