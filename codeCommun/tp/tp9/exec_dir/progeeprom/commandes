@@ -1,44 +1,8 @@
-DAL 120; # commande rejetee
+#man 1
 
 
-# Commencer les executions
-DBT;
-//debut du trajet: affichage matrice
 
 
-MON 16;
-MON 48;
-MON 112;
-MON 240;
+#man 2
 
-MOF;
-
-MRE 254;
-ATT 200;
-TRD;
-ATT 120;
-TRG;
-ATT 120;
-MAR;
-
-//clignoter 2 fois 
-DBC 1;
-DAL 254;
-DET;
-DAL 10;
-FBC;
-DET;
-
-// Faire bouger le robot
-MAV 254;
-ATT 200;
-MAR;
-ATT 20;
-TRD;
-ATT 120;
-TRG;
-ATT 120;
-MAR;
-
-
-FIN;
+#man 3
