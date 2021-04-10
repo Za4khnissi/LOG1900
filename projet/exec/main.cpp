@@ -1,58 +1,59 @@
-void detectionRangee(uint8_t &port) {
-	DDRC |= (1 << pin);
-	PORTC = 0x1C;
-	if (PINC & 0x20)
-		int rangeeActive = R1;
-	if (PINC & 0x40)
-		int rangeeActive = R2;
-	if (PINC & 0x80)
-		int rangeeActive = R3;
-}
+#define __DELAY_BACKWARD_COMPATIBLE__
+#define F_CPU 8000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/eeprom.h>
 
-enum Clavier
+
+/*enum Clavier
 {
-	C1, 
-	C2, 
-	C3,
-	R1, 
-	R2,
-	R3
+    C1, 
+    C2, 
+    C3,
+    R1, 
+    R2,
+    R3
 };
+
+
 int colonneActive;
 int rangeeActive;
 
-void detectionColonne() {
-	DDRC = 0xE0;
 
-	PORTC |= 0xE0;
+void detectionRangee() {
+    DDRC = 0x1C;
+    PORTC = 0x1C;
+    if (PINC & 0x20)
+        rangeeActive = R1;
+    if (PINC & 0x40)
+        rangeeActive = R2;
+    if (PINC & 0x80)
+        rangeeActive = R3;
 
-	if (PINC & 0x4)
-		void detectionRangee(uint8_t & port);
-
-	if (PINC & 0x8)
-		void detectionRangee(uint8_t & port);
-
-	}
-	if (PINC & 0x16)
-		void detectionRangee(uint8_t & port);
-
-
-
-
-
-		//int colonneActive = C2;
-		//DDRC = 0x1C;
-		//PORTC = 0x1C;
-		//if (PINC & 0x20)
-		//	int rangeeActive = R1;
-		//if (PINC & 0x40)
-		//	int rangeeActive = R2;
-		//if (PINC & 0x80)
-		//	int rangeeActive = R3;
-	};
 }
 
 
+void detectionDeBouton() {
+    DDRC = 0xE0;
+
+    PORTC |= 0xE0;
+
+    if (PINC & 0x4){
+        colonneActive = C3;
+        detectionRangee();
+    }
+
+    if (PINC & 0x8){
+        colonneActive = C2;
+        detectionRangee();
+    }
+
+    if (PINC & 0x16){
+        colonneActive = C1;
+        detectionRangee();
+    }
+}
+*/
 
 
 
@@ -71,11 +72,12 @@ void pressButton(){
 	};
 
 		boutonAppuye bouton;
-		DDRC |= 0xE0;
+		DDRC = 0xE0;
 		PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
+		DDRA = 0x01;
 
 		if (PINC & 0x04){
-			DDRC |= 0x1C;
+			DDRC = 0x1C;
 			PORTC &= 0x04;
 				if (PINC & 0x80){
 					bouton = diez; // ajouter quoi faire
@@ -89,10 +91,10 @@ void pressButton(){
 	
 		}
 		if (PINC & 0x08){
-			DDRC |= 0x1C;
+			DDRC = 0x1C;
 			PORTC &= 0x08;
 				if (PINC & 0x80){
-					bouton = e; // ajouter quoi faire
+					PORTA = 0x01; // ajouter quoi faire
 				}
 				else if (PINC & 0x40){
 					bouton = v;
@@ -103,10 +105,10 @@ void pressButton(){
 	
 		}
 		if (PINC & 0x10){
-			DDRC |= 0x1C;
+			DDRC = 0x1C;
 			PORTC &= 0x10;
 				if (PINC & 0x80){
-					bouton = i; // ajouter quoi faire
+					PORTA = 0x00; // ajouter quoi faire
 				}
 				else if (PINC & 0x40){
 					bouton = r;
@@ -121,6 +123,9 @@ void pressButton(){
 
 int main()
 {
-    
+
+	for(;;){
+    pressButton();
+	}
     return 0;
 }

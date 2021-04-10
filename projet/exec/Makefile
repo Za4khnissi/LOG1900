@@ -32,10 +32,10 @@ PROJECTNAME=robot
 PRJSRC=main.cpp
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
-INC= -I ../lib_dir
+INC= -I ../lib
 
 # Libraires a lier (ex: -lmylib)
-LIBS= -l statique -L ../lib_dir
+LIBS= -l statique -L ../lib
 
 # Niveau d'optimization
 # Utilisez s (size opt), 1, 2, 3 ou 0 (off)
