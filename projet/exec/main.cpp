@@ -3,15 +3,27 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/eeprom.h>
+#include <stdio.h>
 
 #include "debug.h"
 #include "Button.h"
-
-#include <stdio.h>
-
 #include "Can.h"
 #include "UART.h"
 
+uint16_t period = 7812;
+volatile uint8_t lecture = 0;
+
+    enum boutonAppuye {
+        ONE,
+        TWO,
+        FOUR,
+        R,
+        V,
+        C,
+        I,
+        E,
+        HASHTAG
+    };
 
 enum Sensor {
     left,
@@ -40,6 +52,37 @@ void selectSensor(Sensor sensor) {
             PORTA &= ~(1 << PA2);
         break;
     }
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    lecture = 1;
+    // minuterieExpiree = 1;
+}
+
+// faire ca a partir de librairie ****
+
+void partirMinuterie(uint16_t duree)
+{
+
+    // mode CTC du timer 1 avec horloge divisée par 1024
+    // interruption après la durée spécifiée
+    lecture = 0;
+
+    TCNT1 = 0;
+    OCR1A = duree;
+    TCCR1A = 1 << WGM12;
+    TCCR1B = 1 << CS12 | 1 << CS10;
+    TCCR1C = 0;
+    TIMSK1 = 1 << OCIE1A;
+}
+
+// faire ca a partir de librairie ****
+void initialisation(){
+    cli();
+    //DDRC |= 0xFC;
+    //EIMSK |= (1 << INT0);
+    sei();
 }
 
 void selectCan(AnalogDigConv can){
@@ -109,18 +152,7 @@ uint8_t distance(AnalogDigConv converter) {
     }
 }
 
-void pressButton(){
-    enum boutonAppuye {
-        one,
-        two,
-        four,
-        r,
-        v,
-        c,
-        i,
-        e,
-        diez
-    };
+boutonAppuye pressButton(){
 
         boutonAppuye bouton;
         DDRC = 0xE0;
@@ -132,18 +164,18 @@ void pressButton(){
             PORTC = 0x04;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT(" # ", 4);
-                    bouton = diez; // ajouter quoi faire
+                    DEBUG_PRINT("Le bouton # du clavier a été appuyé.\n", 41);
+                    bouton = HASHTAG;
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    DEBUG_PRINT(" C ", 4);
-                    bouton = c;
+                    DEBUG_PRINT("Le bouton C du clavier a été appuyé.\n", 41);
+                    bouton = C;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    DEBUG_PRINT(" 4 ", 4);
-                    bouton = four;
+                    DEBUG_PRINT("Le bouton 4 du clavier a été appuyé.\n", 41);
+                    bouton = FOUR;
                 }
 
         }
@@ -152,18 +184,18 @@ void pressButton(){
             PORTC = 0x08;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT(" E ", 4);
-                    PORTA = 0x01; // ajouter quoi faire
+                    DEBUG_PRINT("Le bouton E du clavier a été appuyé.\n", 41);
+                    bouton = E;
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    DEBUG_PRINT(" V ", 4);
-                    bouton = v;
+                    DEBUG_PRINT("Le bouton V du clavier a été appuyé.\n", 41);
+                    bouton = V;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    DEBUG_PRINT(" 2 ", 4);
-                    bouton = two;
+                    DEBUG_PRINT("Le bouton 2 du clavier a été appuyé.\n", 41);
+                    bouton = TWO;
                 }
 
         }
@@ -172,29 +204,71 @@ void pressButton(){
             PORTC = 0x10;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT(" I ", 4);
-                    PORTA = 0x00; 
+                    DEBUG_PRINT("Le bouton I du clavier a été appuyé.\n", 41);
+                    bouton = I; 
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    DEBUG_PRINT(" R ", 4);
-                    bouton = r;
+                    DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
+                    bouton = R;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    DEBUG_PRINT(" 1 ", 4);
-                    bouton = one;
+                    DEBUG_PRINT("Le bouton 1 du clavier a été appuyé.\n", 41);
+                    bouton = ONE;
                 }
 		}
-
+    return bouton;
 }
 
+void changeFrequency(boutonAppuye bouton){
+    switch(bouton){
+        case ONE:
+            period = 7812;
+            break;
+        case TWO:
+            period = 7812/2;
+            break;
+        case FOUR:
+            period = 7812/4;
+            break;
+    }
+}
+
+uint8_t changeDetectionMode(boutonAppuye bouton, uint8_t var){
+    switch(bouton){
+        case E:
+            var = distance(AnalogDigConv::external);
+        case I:
+            var = distance(AnalogDigConv::internal);
+    }
+    return var;
+}
 
 int main()
 {
+    DDRA = ~0x02;
+    UART uart;
+    char mot[] = "Distance releve par la can: ";
+    uint8_t var;
+    uart.transmissionMessage(mot, sizeof(mot));
+    
+    selectSensor(Sensor::right);
 
-	for(;;){
-    pressButton();
-	}
-    return 0;
+    initialisation();
+
+
+    for(;;){ 
+        boutonAppuye bouton = pressButton();
+        changeFrequency(bouton);
+        partirMinuterie(period);
+        do {
+        } while (lecture == 0);
+
+        changeDetectionMode(bouton, var);
+        char var2[10];
+        float d = 5 * pow (var, -1);
+        sprintf(var2, "%d\n", var);
+        uart.transmissionMessage(var2, sizeof(var2));
+    }
 }
