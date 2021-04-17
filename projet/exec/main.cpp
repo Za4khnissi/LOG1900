@@ -57,7 +57,6 @@ void selectSensor(Sensor sensor) {
 ISR(TIMER1_COMPA_vect)
 {
     lecture = 1;
-    // minuterieExpiree = 1;
 }
 
 // faire ca a partir de librairie ****
