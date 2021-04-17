@@ -163,7 +163,7 @@ boutonAppuye pressButton(){
             PORTC = 0x04;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT("Le bouton # du clavier a été appuyé.\n", 41);
+                    
                     bouton = HASHTAG;
                 }
                 else if (PINC & 0x40){
@@ -183,17 +183,14 @@ boutonAppuye pressButton(){
             PORTC = 0x08;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT("Le bouton E du clavier a été appuyé.\n", 41);
                     bouton = E;
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    DEBUG_PRINT("Le bouton V du clavier a été appuyé.\n", 41);
                     bouton = V;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    DEBUG_PRINT("Le bouton 2 du clavier a été appuyé.\n", 41);
                     bouton = TWO;
                 }
 
@@ -203,17 +200,14 @@ boutonAppuye pressButton(){
             PORTC = 0x10;
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    DEBUG_PRINT("Le bouton I du clavier a été appuyé.\n", 41);
                     bouton = I; 
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
                     bouton = R;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    DEBUG_PRINT("Le bouton 1 du clavier a été appuyé.\n", 41);
                     bouton = ONE;
                 }
 		}
@@ -246,28 +240,38 @@ uint8_t changeDetectionMode(boutonAppuye bouton, uint8_t var){
 
 int main()
 {
-    DDRA = ~0x02;
-    UART uart;
-    char mot[] = "Distance releve par la can: ";
-    uint8_t var;
-    uart.transmissionMessage(mot, sizeof(mot));
-    
-    selectSensor(Sensor::right);
 
-    initialisation();
+    for(;;){
+    boutonAppuye bouton = pressButton();
+        switch(bouton){
+            case ONE:
+            DEBUG_PRINT("Le bouton 1 du clavier a été appuyé.\n", 41);
+            break;
+            case TWO:
+            DEBUG_PRINT("Le bouton 2 du clavier a été appuyé.\n", 41);
+            break;
+            case FOUR:
+            DEBUG_PRINT("Le bouton 4 du clavier a été appuyé.\n", 41);
+            break;
+            case R:
+            DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
+            break;
+            case V:
+            DEBUG_PRINT("Le bouton V du clavier a été appuyé.\n", 41);
+            break;
+            case C:
+            DEBUG_PRINT("Le bouton C du clavier a été appuyé.\n", 41);
+            break;
+            case I:
+            DEBUG_PRINT("Le bouton I du clavier a été appuyé.\n", 41);
+            break;
+            case E:
+            DEBUG_PRINT("Le bouton E du clavier a été appuyé.\n", 41);
+            break;
+            case HASHTAG:
+            DEBUG_PRINT("Le bouton # du clavier a été appuyé.\n", 41);
+            break;
 
-
-    for(;;){ 
-        boutonAppuye bouton = pressButton();
-        changeFrequency(bouton);
-        partirMinuterie(period);
-        do {
-        } while (lecture == 0);
-
-        changeDetectionMode(bouton, var);
-        char var2[10];
-        float d = 5 * pow (var, -1);
-        sprintf(var2, "%d\n", var);
-        uart.transmissionMessage(var2, sizeof(var2));
+        }
     }
 }
