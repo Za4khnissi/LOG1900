@@ -15,14 +15,11 @@
 #define MIN_DISTANCE 10.0F
 #define CONV_FACTOR 5.0F / 255.0F
 
-volatile 
 
-enum manoeuvre {
-    M1,
-    M2,
-    M3,
-    M4,
-    M5
+enum Frequency{
+    O, // one
+    T, // two
+    F  // four
 };
 
 enum pressedBouton{
@@ -56,6 +53,7 @@ enum DisplayMode
     VV,
     CC
 };
+
 
 void selectSensor(uint8_t sensor)
 {
@@ -462,6 +460,7 @@ int main() {
 
     pressedBouton bouton;
     DisplayMode displayMode;
+    Frequency frequency = O;
 
     AnalogDigConv converter = AnalogDigConv::internal;
     
@@ -474,12 +473,15 @@ int main() {
         switch(bouton){
             case pressedBouton::ONE:
                 DEBUG_PRINT("Le bouton 1 du clavier a été appuyé.\n", 41);
+                frequency = Frequency::O;
             break;
             case pressedBouton::TWO:
                 DEBUG_PRINT("Le bouton 2 du clavier a été appuyé.\n", 41);
+                frequency = Frequency::T;
             break;
             case pressedBouton::FOUR:
                 DEBUG_PRINT("Le bouton 4 du clavier a été appuyé.\n", 41);
+                frequency = Frequency::F;
             break;
             case pressedBouton::R:
                 DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
@@ -546,6 +548,7 @@ int main() {
         switch (displayMode)
         {
             case DisplayMode::RR:
+                
                 break;
             
             case DisplayMode::VV:
