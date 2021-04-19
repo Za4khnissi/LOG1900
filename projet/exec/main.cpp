@@ -15,6 +15,16 @@
 #define MIN_DISTANCE 10.0F
 #define CONV_FACTOR 5.0F / 255.0F
 
+volatile 
+
+enum manoeuvre {
+    M1,
+    M2,
+    M3,
+    M4,
+    M5
+};
+
 enum pressedBouton{
     ONE,
     TWO,
@@ -27,7 +37,6 @@ enum pressedBouton{
     HASHTAG
 };
 
-
 enum Sensor
 {
     left,
@@ -39,6 +48,13 @@ enum AnalogDigConv
 {
     internal = 12,
     external
+};
+
+enum DisplayMode
+{
+    RR = 20,
+    VV,
+    CC
 };
 
 void selectSensor(uint8_t sensor)
@@ -82,7 +98,7 @@ uint8_t distance(AnalogDigConv converter)
     {
         Can can;
         uint8_t volts = can.lecture(PA1) >> 2;
-        return volts; 
+        return volts; //* (5/1024);
     }
     else
     {
@@ -235,17 +251,26 @@ void startUpMode()
     
 }
 
+void clear(char array[], uint8_t size)
+{
+    
+    for (uint8_t i = 0; i < size; i++)
+    {
+        array[i] = '\0';
+    }
+}
+
 pressedBouton pressButton(){
 
         pressedBouton bouton;
-        DDRC = 0xE0;
-        PORTC = 0xE0;
+        DDRC = 0xE3;
+        PORTC = 0xE3;
         //DDRC |= _BV(PC7) | _BV(PC6) | _BV(PC5) 
         //DDRC &= ~_BV(PC4) & ~_BV(PC3) & ~_BV(PC2);
         //PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
 
         if (PINC & 0x04){
-            DDRC = 0x1C;
+            DDRC = 0x1F;
             PORTC = 0x04;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC2);
@@ -264,7 +289,7 @@ pressedBouton pressButton(){
 
         }
         if (PINC & 0x08){
-            DDRC = 0x1C;
+            DDRC = 0x1F;
             PORTC = 0x08;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC3);
@@ -283,7 +308,7 @@ pressedBouton pressButton(){
 
         }
         if (PINC & 0x10){ 
-            DDRC = 0x1C;
+            DDRC = 0x1F;
             PORTC = 0x10;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC4);
@@ -303,90 +328,147 @@ pressedBouton pressButton(){
         return bouton;
 }
 
-void detection() {
+/*void detection(){
 
-uint8_t adc = 0;
+    pressedBouton bouton;
+    uint8_t adc = 0;
     float voltage = 0.0F;
+    DisplayMode displayMode;
+
     float previousDist = 0.0F;
     float currentDist = 0.0F;
     
     float distances[3] = {0, 0, 0};
+    bool distChanged = false;
+
     char categories[40] = "";
-    while (true)
-    {
-        uint8_t sensorIndex = 0;
-        for (; sensorIndex < 3; sensorIndex++)
+    bool categoryChanged = false;
+
+    for(;;) {
+
+        bouton = pressButton();
+        switch (bouton)
         {
-            previousDist = distances[sensorIndex]; 
+        case pressedBouton::R:
+            DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
+            displayMode = DisplayMode::RR;
+            
+            break;
+        case pressedBouton::V:
+            DEBUG_PRINT("Le bouton V du clavier a été appuyé.\n", 41);
+            displayMode = DisplayMode::VV;
+            
+            break;
+        case pressedBouton::C:
+            DEBUG_PRINT("Le bouton C du clavier a été appuyé.\n", 41);
+            displayMode = DisplayMode::CC;
+            
+            break;
+        
+        default:
+            break;
+        }
+        for (uint8_t sensorIndex = 0; sensorIndex < 3; sensorIndex++)
+        {
+            previousDist = distances[sensorIndex];
             selectSensor(sensorIndex);
             // permettre d echager de can après un appui sur le clavier
             adc = distance(AnalogDigConv::internal); 
             voltage = adc * CONV_FACTOR;
-            currentDist = 28.998 * pow(voltage, -1.141);
+            currentDist = 28.998F * pow(voltage, -1.141F);
+
             if (currentDist <= MIN_DISTANCE)
             {
                 currentDist = MIN_DISTANCE;
             }
-            distances[sensorIndex] = currentDist;
             
+            if(selectCategory(previousDist) != selectCategory(currentDist))
+            {
+                categoryChanged = true;
+            }
+
+            if (previousDist  != currentDist)
+            {
+                distChanged = true;
+                distances[sensorIndex] = currentDist;
+            }
+        
+
             // concatenation
             strcat(categories, selectCategory(currentDist)); 
+
+            // Si on a pris les mesures sur tous les capteurs, celui de droite etant le dernier
             if (sensorIndex != Sensor::right)
             {
                 strcat(categories, "|");
             } else {
-                strcat(categories, "\n"); 
+                strcat(categories, "\n"); //
             }
-            
-            switch (displayMode)
-            {
-                case DisplayMode::R:
-                    /* code */
-                    break;
-                
-                case DisplayMode::V:
-                    if (!equals(currentDist, previousDist))
-                    {
-                        display(distances, categories);
-                        // vider le tableau categorie
-                        for (uint8_t i = 0; i < sizeof(categories); i++)
-                        {
-                            categories[i] = '\0';
-                        }
-                        _delay_ms(100);
-                        }
-                    
-                    break;
-                case DisplayMode::C:
-                    break;
-                default:
-                    break;
-            }
-            
-            
         }
-        
-    }
 
-}
+        switch (displayMode)
+        {
+            case DisplayMode::RR:
+                break;
+            
+            case DisplayMode::VV:
+
+                if (distChanged)
+                {
+                    display(distances, categories);
+                    distChanged = false;
+                }
+                break;
+
+            case DisplayMode::CC:
+            
+                if(categoryChanged)
+                {
+                    display(distances, categories);
+                    categoryChanged = false;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+    clear(categories, sizeof(categories));
+    }
+    
+}*/
+
 
 
 
 int main() {
-    DDRA |= ~_BV(PA1); //1111 1101 
-    DDRB |= ~_BV(PB1); //1111 1101
-    //DDRD |= ~_BV() ; //1111 1000
-    //0000 0011
+    DDRA = 0xFD; //1111 1101 
+    DDRB = 0xFD; //1111 1101
+    DDRD = 0xF8; //1111 1000
+    
 
+    uint8_t adc = 0;
+    float voltage = 0.0F;
+
+
+    float previousDist = 0.0F;
+    float currentDist = 0.0F;
     
+    float distances[3] = {0, 0, 0};
+    bool distChanged = false;
+
+    char categories[40] = "";
+    bool categoryChanged = false;
+
     pressedBouton bouton;
-    
+    DisplayMode displayMode;
+
+    AnalogDigConv converter = AnalogDigConv::internal;
     
     // Mode demarrage
     startUpMode();
 
     for(;;){
-        pressButton();
         bouton = pressButton();
 
         switch(bouton){
@@ -401,28 +483,94 @@ int main() {
             break;
             case pressedBouton::R:
                 DEBUG_PRINT("Le bouton R du clavier a été appuyé.\n", 41);
-
+                displayMode = DisplayMode::RR;
             break;
             case pressedBouton::V:
                 DEBUG_PRINT("Le bouton V du clavier a été appuyé.\n", 41);
-
+                displayMode = DisplayMode::VV;
             break;
             case pressedBouton::C:
                 DEBUG_PRINT("Le bouton C du clavier a été appuyé.\n", 41);
-
+                displayMode = DisplayMode::CC;
             break;
             case pressedBouton::I:
                 DEBUG_PRINT("Le bouton I du clavier a été appuyé.\n", 41);
-                selectCan(AnalogDigConv::internal);
+                converter = AnalogDigConv::internal;
             break;
             case pressedBouton::E:
                 DEBUG_PRINT("Le bouton E du clavier a été appuyé.\n", 41);
-                selectCan(AnalogDigConv::external);
+                converter = AnalogDigConv::external;
             break;
             case pressedBouton::HASHTAG:
                 DEBUG_PRINT("Le bouton # du clavier a été appuyé.\n", 41);
             break;
         }
+        for (uint8_t sensorIndex = 0; sensorIndex < 3; sensorIndex++)
+        {
+            previousDist = distances[sensorIndex];
+            selectSensor(sensorIndex);
+            // permettre d echager de can après un appui sur le clavier
+            adc = distance(converter); 
+            voltage = adc * CONV_FACTOR;
+            currentDist = 28.998F * pow(voltage, -1.141F);
+
+            if (currentDist <= MIN_DISTANCE)
+            {
+                currentDist = MIN_DISTANCE;
+            }
+            
+            if(selectCategory(previousDist) != selectCategory(currentDist))
+            {
+                categoryChanged = true;
+            }
+
+            if (previousDist  != currentDist)
+            {
+                distChanged = true;
+                distances[sensorIndex] = currentDist;
+            }
+        
+
+            // concatenation
+            strcat(categories, selectCategory(currentDist)); 
+
+            // Si on a pris les mesures sur tous les capteurs, celui de droite etant le dernier
+            if (sensorIndex != Sensor::right)
+            {
+                strcat(categories, "|");
+            } else {
+                strcat(categories, "\n"); //
+            }
+        }
+
+        switch (displayMode)
+        {
+            case DisplayMode::RR:
+                break;
+            
+            case DisplayMode::VV:
+
+                if (distChanged)
+                {
+                    display(distances, categories);
+                    distChanged = false;
+                }
+                break;
+
+            case DisplayMode::CC:
+            
+                if(categoryChanged)
+                {
+                    display(distances, categories);
+                    categoryChanged = false;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+    clear(categories, sizeof(categories));
     }
     return 0;
 }
