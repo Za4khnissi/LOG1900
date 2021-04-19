@@ -14,15 +14,17 @@
 #define BUFFER_SIZE 20
 #define MIN_DISTANCE 10.0F
 #define CONV_FACTOR 5.0F / 255.0F
+#define ONE_ 1
 
-volatile 
+volatile uint8_t maneuverId;
 
-enum manoeuvre {
+enum Maneuver {
     M1,
     M2,
     M3,
     M4,
-    M5
+    M5,
+    Invalid
 };
 
 enum pressedBouton{
@@ -49,6 +51,8 @@ enum AnalogDigConv
     internal = 12,
     external
 };
+
+AnalogDigConv converter = AnalogDigConv::internal;
 
 enum DisplayMode
 {
@@ -149,10 +153,13 @@ void display(float distances[], const char categories[])
 {
     float currentValue = 0.0F;
     const char msg[] = "Can interne: ";
+    const char msg2[] = "Can externe: ";
     char buffer[BUFFER_SIZE] = {' '};
     const char *sides[] = {"G:", "C:", "D:"};
 
-    DEBUG_PRINT(msg, sizeof(msg));
+    if(converter == AnalogDigConv::internal) { DEBUG_PRINT(msg, sizeof(msg)); }
+    else { DEBUG_PRINT(msg2, sizeof(msg2)); }
+
 
     for (uint8_t i = 0; i < 3; i++)
     {
@@ -438,18 +445,269 @@ pressedBouton pressButton(){
     
 }*/
 
+uint8_t checkCategory(float distance) {
+    if (distance >= MIN_DISTANCE && distance < 20.0F)
+        return 1;
+    else if (distance >= 20.0F && distance < 50.0F)
+        return 2;
+    else
+        return 3;
+}
+
+uint8_t selectManeuver(float leftDistance, float centerDistance, float rightDistance) {
+    uint8_t left = checkCategory(leftDistance);
+    uint8_t center = checkCategory(centerDistance);
+    uint8_t right = checkCategory(rightDistance);
+
+    if(left == 3 && center == 2 && right == 2) 
+        return 1;   // Manoeuvre 1
+
+    else if(left == 2 && center == 2 && right == 3)
+        return 2;   // Manoeuvre 2
+
+    else if(left == 1 && center == 1 && right == 1)
+        return 3;   // Manoeuvre 3
+
+    else if(left == 3 && center == 3 && right == 1)
+        return 4;   // Manoeuvre 4
+
+    else if(left == 1 && center == 3 && right == 3)
+        return 5;   // Manoeuvre 5
+
+    else
+        return 0;
+}   
 
 
+void moteur(int ocr1b, int ocr1a) //roue droite recule
+{
+    if(ocr1a < 0)
+    {
+        PORTD |= _BV(PD3);                 //gauche  ocr1b
+        PORTD &= ~_BV(PD6);                //droite  ocr1a
+        ocr1b = (ocr1b*255)/100;
+        ocr1a = (-1*(ocr1a*255))/100;
+    }
 
-int main() {
+    else if((ocr1b > 0) & (ocr1a > 0))
+    {
+        PORTD |= _BV(PD3);                 //gauche  ocr1b
+        PORTD |= _BV(PD6);                  //droite  ocr1a
+        ocr1b = (ocr1b*255)/100;
+        ocr1a = (ocr1a*255)/100;
+    }
+
+    else if(ocr1b < 0)
+    {
+        PORTD &= ~_BV(PD3);                 //gauche  ocr1b
+        PORTD |= _BV(PD6);                  //droite  ocr1a
+        ocr1b = (-1*(ocr1b*255))/100;
+        ocr1a = (ocr1a*255)/100;
+    }
+
+    else if((ocr1a < 0) & (ocr1b < 0))
+    {
+        PORTD &= ~_BV(PD3);                 //gauche  ocr1b
+        PORTD &= ~_BV(PD6);                  //droite  ocr1a
+        ocr1b = (-1*(ocr1b*255))/100;
+        ocr1a = (-1*(ocr1a*255))/100;
+    }
+    PWM::adjustPWM(ocr1a, ocr1b);
+}
+
+void manoeuvre1()
+{
+
+    moteur(-35, 35);
+    _delay_ms(1500);
+
+    moteur(35, 35);
+    _delay_ms(2000);
+
+    moteur(35, -35);
+    _delay_ms(1500);
+
+    moteur(35, 35);         //pas necessaire mais juste pour respecter le consigne
+
+    for(int i = 35; i <= 95; i = i+5)
+    {
+        moteur(i, i);
+        _delay_ms(125);
+    }
+
+    _delay_ms(2000);
+}
+
+void manoeuvre2()
+{
+
+    moteur(35, -35);
+    _delay_ms(1500);
+
+    moteur(35, 35);
+    _delay_ms(2000);
+
+    moteur(-35, 35);
+    _delay_ms(1500);
+
+    moteur(35, 35);
+
+    for(int i = 35; i < 95; i = i+5)
+    {
+        moteur(i, i);
+        _delay_ms(125);
+    }
+
+    _delay_ms(2000);
+}
+
+void manoeuvre3()
+{
+
+    moteur(-50, -50);
+    _delay_ms(1000);
+
+    moteur(-70, 70);
+    _delay_ms(1500);
+
+    for(int i = 0; i <= 99; i = i+3)
+    {
+        moteur(i, i);
+        _delay_ms(50);
+    }
+
+    for(int i = 99; i >= 74; i = i-5)
+    {
+        moteur(i, i);
+        _delay_ms(500);
+    }
+
+    _delay_ms(2000);
+}
+
+void manoeuvre4()
+{
+
+    moteur(78, 78);
+
+    int i = 78;
+
+    for(; i >= 48; i = i-2)
+    {
+        moteur(i, 78);
+        _delay_ms(250);
+    }
+
+    _delay_ms(1500);
+
+
+    for(; i <= 78; i = i+2)
+    {
+        moteur(i, 78);
+        _delay_ms(250);
+    }
+
+    _delay_ms(2000);
+}
+
+void manoeuvre5()
+{
+
+    moteur(78, 78);
+
+    int i = 78;
+
+    for(; i >= 48; i = i-2)
+    {
+        moteur(78, i);
+        _delay_ms(250);
+    }
+
+    _delay_ms(1500);
+
+
+    for(; i <= 78; i = i+2)
+    {
+        moteur(78, i);
+        _delay_ms(250);
+    }
+
+    _delay_ms(2000);
+}
+
+
+ISR (INT0_vect) {
+
+    if(maneuverId == 1) {
+        char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        manoeuvre1();
+    }
+
+    else if(maneuverId == 2){
+        char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        manoeuvre2();
+    }
+
+    else if(maneuverId == 3) {
+        char mot[] = "Manoeuvre 3 ( DANGER - DANGER - DANGER) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        manoeuvre3();
+    }
+
+    else if(maneuverId == 4) {
+        char mot[] = "Manoeuvre 4 (OK - OK - DANGER) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        manoeuvre4();
+    }
+
+    else if(maneuverId == 5){
+        char mot[] = "Manoeuvre 5 (DANGER - OK - OK) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        manoeuvre5();
+    }
+    else if(maneuverId == 0) {
+        //Invalid Maneuver
+        char mot[] = "Manoeuvre invalid \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+    }
+    
+    EIFR |= (1 << INTF0) ;
+}
+
+
+void initialisation ( void ) {
+    cli ();
+
+    // Iniatialisation des ports
     DDRA = 0xFD; //1111 1101 
     DDRB = 0xFD; //1111 1101
     DDRD = 0xF8; //1111 1000
+
+    // cette procédure ajuste le registre EIMSK
+    // de l’ATmega324PA pour permettre les interruptions externes
+    EIMSK |= (1 << INT0) ;
+
+    // il faut sensibiliser les interruptions externes aux
+    // changements de niveau du bouton-poussoir
+    // en ajustant le registre EICRA
+    EICRA |= (1 << ISC01) | (1 << ISC00) ;
+
+    // sei permet de recevoir à nouveau des interruptions.
+    sei ();
+}
+
+int main() {
     
+    initialisation();
 
     uint8_t adc = 0;
     float voltage = 0.0F;
 
+    float leftSensorDist, centerSensorDist, rightSensorDist;
+
+    Maneuver maneuver;
 
     float previousDist = 0.0F;
     float currentDist = 0.0F;
@@ -513,6 +771,18 @@ int main() {
             adc = distance(converter); 
             voltage = adc * CONV_FACTOR;
             currentDist = 28.998F * pow(voltage, -1.141F);
+
+            if(sensorIndex == 0) {
+                leftSensorDist = currentDist;
+            }
+            else if(sensorIndex == 1) {
+                centerSensorDist = currentDist;
+            }
+            else {
+                rightSensorDist = currentDist;
+            }
+
+            maneuverId = selectManeuver(leftSensorDist, centerSensorDist, rightSensorDist);
 
             if (currentDist <= MIN_DISTANCE)
             {
