@@ -548,7 +548,7 @@ int main() {
         switch (displayMode)
         {
             case DisplayMode::RR:
-                
+            
                 break;
             
             case DisplayMode::VV:
