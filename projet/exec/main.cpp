@@ -605,7 +605,7 @@ ISR(TIMER1_COMPA_vect)
 
 }
 
-void initManoeuvre ( void ) {
+void init ( void ) {
     cli ();
 
     // Iniatialisation des ports
@@ -634,7 +634,7 @@ void initFrequence(){
 
 int main() {
     
-    initManoeuvre();
+    init();
 
     uint8_t adc = 0;
     float voltage = 0.0F;
@@ -659,7 +659,7 @@ int main() {
     
     // Mode demarrage
     startUpMode();
-    for(;;){
+    /*for(;;){
         bouton = pressButton();
 
         switch(bouton){
@@ -824,6 +824,6 @@ int main() {
         }
 
     clear(categories, sizeof(categories));
-    }
+    }*/
     return 0;
 }
