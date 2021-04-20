@@ -699,8 +699,10 @@ int main() {
                 DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 38);
             break;
         }
-        for (uint8_t sensorIndex = 0; sensorIndex < 3; sensorIndex++)
+        
+        for (uint8_t sensorIndex = 0 ; sensorIndex < 3; sensorIndex++)
         {
+            
             previousDist = distances[sensorIndex];
             selectSensor(sensorIndex);
             // permettre d echager de can après un appui sur le clavier
@@ -764,7 +766,8 @@ int main() {
                             do{
 
                             }while(lecture == 0);
-                            display(distances, categories, converter);
+                                display(distances, categories, converter);
+
                             bouton = pressButton();
                         }
                         break;
@@ -778,7 +781,7 @@ int main() {
                             do{
 
                             }while(lecture == 0);
-                            display(distances, categories, converter);
+                                display(distances, categories, converter);
                             bouton = pressButton();
                         }
                         break;
@@ -792,7 +795,7 @@ int main() {
                             do{
 
                             }while(lecture == 0);
-                            display(distances, categories, converter);
+                                display(distances, categories, converter);
                             bouton = pressButton();
                         }
                         break;
@@ -805,7 +808,7 @@ int main() {
                             do{
 
                             }while(lecture == 0);
-                            display(distances, categories, converter);
+                                display(distances, categories, converter);
                             bouton = pressButton();
                         }
                         break;
