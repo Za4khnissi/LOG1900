@@ -295,14 +295,14 @@ void clear(char array[], uint8_t size)
 pressedBouton pressButton(){
 
         pressedBouton bouton;
-        DDRC = 0xE3;
-        PORTC = 0xE3;
+        DDRC = 0xE0;
+        PORTC = 0xE0;
         //DDRC |= _BV(PC7) | _BV(PC6) | _BV(PC5) 
         //DDRC &= ~_BV(PC4) & ~_BV(PC3) & ~_BV(PC2);
         //PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
 
         if (PINC & 0x04){
-            DDRC = 0x1F;
+            DDRC = 0x1C;
             PORTC = 0x04;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC2);
@@ -321,7 +321,7 @@ pressedBouton pressButton(){
 
         }
         else if (PINC & 0x08){
-            DDRC = 0x1F;
+            DDRC = 0x1C;
             PORTC = 0x08;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC3);
@@ -340,7 +340,7 @@ pressedBouton pressButton(){
 
         }
         else if (PINC & 0x10){ 
-            DDRC = 0x1F;
+            DDRC = 0x1C;
             PORTC = 0x10;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
             //PORTC |= _BV(PC4);
@@ -659,7 +659,7 @@ int main() {
     
     // Mode demarrage
     startUpMode();
-    /*for(;;){
+    for(;;){
         bouton = pressButton();
 
         switch(bouton){
@@ -752,9 +752,10 @@ int main() {
         switch (displayMode)
         {
             case DisplayMode::RR:
-                while(bouton == pressedBouton::ONE || bouton == pressedBouton::TWO || bouton == pressedBouton::FOUR){
-
+                while(bouton == pressedBouton::ONE || bouton == pressedBouton::TWO || bouton == pressedBouton::FOUR || bouton == pressedBouton::R){
+                        
                     switch(bouton){
+                        
                         case pressedBouton::ONE:
                         {
                         initFrequence();
@@ -796,6 +797,18 @@ int main() {
                         }
                         break;
                         }
+                        default:
+                        {
+                            initFrequence();
+                        while (bouton == pressedBouton::R || bouton == pressedBouton::REPEAT){
+                            partirMinuterie(7812);
+                            do{
+
+                            }while(lecture == 0);
+                            display(distances, categories, converter);
+                            bouton = pressButton();
+                        }
+                        break;
                     }
                     bouton = pressButton(); 
                 }
@@ -822,8 +835,9 @@ int main() {
             default:
                 break;
         }
+        }
 
     clear(categories, sizeof(categories));
-    }*/
+    }
     return 0;
 }
