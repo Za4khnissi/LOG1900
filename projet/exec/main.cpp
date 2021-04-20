@@ -17,13 +17,15 @@
 #define ONE_ 1
 
 
+volatile uint8_t maneuverId;
+
+volatile uint8_t lecture = 0;
 
 enum Frequency{
     O, // one
     T, // two
     F  // four
 };
-volatile uint8_t maneuverId;
 
 enum Maneuver {
     M1,
@@ -44,6 +46,7 @@ enum pressedBouton{
     I,
     E,
     HASHTAG,
+    REPEAT
 };
 
 enum Sensor
@@ -67,6 +70,21 @@ enum DisplayMode
     INIT
 };
 
+void partirMinuterie(uint16_t duree)
+{
+
+    // mode CTC du timer 1 avec horloge divisée par 1024
+
+    // interruption après la durée spécifiée
+    lecture = 0;
+
+    TCNT1 = 0;
+    OCR1A = duree;
+    TCCR1A = 1 << WGM12;
+    TCCR1B = 1 << CS12 | 1 << CS10;
+    TCCR1C = 0;
+    TIMSK1 = 1 << OCIE1A;
+}
 
 void selectSensor(uint8_t sensor)
 {
@@ -302,7 +320,7 @@ pressedBouton pressButton(){
                 }
 
         }
-        if (PINC & 0x08){
+        else if (PINC & 0x08){
             DDRC = 0x1F;
             PORTC = 0x08;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
@@ -321,7 +339,7 @@ pressedBouton pressButton(){
                 }
 
         }
-        if (PINC & 0x10){ 
+        else if (PINC & 0x10){ 
             DDRC = 0x1F;
             PORTC = 0x10;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
@@ -339,6 +357,9 @@ pressedBouton pressButton(){
                     bouton = pressedBouton::ONE;
                 }
 		}
+        else{
+            bouton = pressedBouton::REPEAT;
+        }
         return bouton;
 }
 
@@ -374,30 +395,6 @@ uint8_t selectManeuver(float leftDistance, float centerDistance, float rightDist
     else
         return 0;
 }   
-
-void modeR(pressedBouton bouton){
-    //pressedBouton verif = bouton; 
-    while(true){
-        bouton = pressButton(); 
-        if(bouton != pressedBouton::ONE && bouton != pressedBouton::TWO && bouton != pressedBouton::FOUR ){
-            break; 
-        }
-        switch(bouton){
-            case pressedBouton::ONE:
-            DEBUG_PRINT("1\n",3);
-            break;
-
-            case pressedBouton::TWO:
-            DEBUG_PRINT("2\n",3);
-            break;
-
-            case pressedBouton::FOUR:
-            DEBUG_PRINT("4\n",3);
-            break;
-
-        }
-    }
-}
 
 
 void moteur(int ocr1b, int ocr1a) //roue droite recule
@@ -602,8 +599,13 @@ ISR (INT0_vect) {
     EIFR |= (1 << INTF0) ;
 }
 
+ISR(TIMER1_COMPA_vect)
+{
+    lecture = 1;
 
-void initialisation ( void ) {
+}
+
+void initManoeuvre ( void ) {
     cli ();
 
     // Iniatialisation des ports
@@ -624,9 +626,15 @@ void initialisation ( void ) {
     sei ();
 }
 
+void initFrequence(){
+    cli();
+    DDRD &= ~_BV(PD4) & ~_BV(PD5);
+    sei();
+}
+
 int main() {
     
-    initialisation();
+    initManoeuvre();
 
     uint8_t adc = 0;
     float voltage = 0.0F;
@@ -656,39 +664,39 @@ int main() {
 
         switch(bouton){
             case pressedBouton::ONE:
-                DEBUG_PRINT("Le bouton 1 du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton 1 du clavier a ete appuye.\n", 38);
                 frequency = Frequency::O;
             break;
             case pressedBouton::TWO:
-                DEBUG_PRINT("Le bouton 2 du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton 2 du clavier a ete appuye.\n", 38);
                 frequency = Frequency::T;
             break;
             case pressedBouton::FOUR:
-                DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", 38);
                 frequency = Frequency::F;
             break;
             case pressedBouton::R:
-                DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::RR;
             break;
             case pressedBouton::V:
-                DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::VV;
             break;
             case pressedBouton::C:
-                DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::CC;
             break;
             case pressedBouton::I:
-                DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", 38);
                 converter = AnalogDigConv::internal;
             break;
             case pressedBouton::E:
-                DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", 38);
                 converter = AnalogDigConv::external;
             break;
             case pressedBouton::HASHTAG:
-                DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 41);
+                DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 38);
             break;
         }
         for (uint8_t sensorIndex = 0; sensorIndex < 3; sensorIndex++)
@@ -748,15 +756,46 @@ int main() {
 
                     switch(bouton){
                         case pressedBouton::ONE:
+                        {
+                        initFrequence();
+                        while (bouton == pressedBouton::ONE || bouton == pressedBouton::REPEAT){
+                            partirMinuterie(7812);
+                            do{
 
+                            }while(lecture == 0);
+                            display(distances, categories, converter);
+                            bouton = pressButton();
+                        }
                         break;
+                        }
 
                         case pressedBouton::TWO:
+                        {
+                            initFrequence();
+                        while (bouton == pressedBouton::TWO || bouton == pressedBouton::REPEAT){
+                            partirMinuterie(7812/2);
+                            do{
 
+                            }while(lecture == 0);
+                            display(distances, categories, converter);
+                            bouton = pressButton();
+                        }
                         break;
+                        }
 
                         case pressedBouton::FOUR:
+                        {
+                            initFrequence();
+                        while (bouton == pressedBouton::FOUR || bouton == pressedBouton::REPEAT){
+                            partirMinuterie(7812/4);
+                            do{
+
+                            }while(lecture == 0);
+                            display(distances, categories, converter);
+                            bouton = pressButton();
+                        }
                         break;
+                        }
                     }
                     bouton = pressButton(); 
                 }
