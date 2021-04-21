@@ -4,7 +4,7 @@ UART::UART() {
   // 2400 bauds. Nous vous donnons la valeur des deux
   // premier registres pour vous éviter des complications
     UBRR0H = 0;
-    UBRR0L = 0xCF;
+    UBRR0L = 0x33;
 
   // permettre la reception et la transmission par le UART0
     UCSR0A = 0;

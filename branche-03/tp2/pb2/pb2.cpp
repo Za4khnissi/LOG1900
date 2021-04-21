@@ -34,7 +34,7 @@ volatile uint8_t etat = 0;
 
 // à prendre en charge en argument
 
-ISR ( 'modifier ici' ) {
+/*ISR ( 'modifier ici' ) {
 
 // laisser un delai avant de confirmer la réponse du
 
@@ -56,7 +56,7 @@ _delay_ms ( 30 );
 
 EIFR |= (1 << INTF0) ;
 
-}
+}*/
 
 
 bool presser_relacher(uint8_t bouton) 
