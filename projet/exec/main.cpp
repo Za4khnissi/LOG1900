@@ -16,8 +16,6 @@
 #define CONV_FACTOR 5.0F / 255.0F
 #define ONE_ 1
 
-
-
 volatile uint8_t maneuverId;
 volatile uint8_t lecture = 0;
 
@@ -69,6 +67,37 @@ enum DisplayMode
     ON_CATEGORY_CHANGE,
     INIT
 };
+
+
+struct Time {
+    uint8_t min = 0, sec = 0, cent = 0;
+};
+
+volatile Time time;
+
+ISR(TIMER0_COMPA_vect){
+
+    time.cent++;
+
+    if(time.cent == 100) {
+        time.sec++;
+        time.cent = 0;
+    }
+    if(time.sec == 60){
+        time.min++;
+        time.sec = 0;
+    }
+}
+
+void partirMinuterie0 () {
+    // mode CTC du timer 0 avec horloge divisée par 1024
+    // interruption après la durée spécifiée
+    TCNT0 = 0;
+    OCR0A = 78; 
+    TCCR0A |= (1 << WGM01);
+    TCCR0B = (1 << CS02) | (1 << CS00);
+    TIMSK0 |= (1 << OCIE0A);
+}
 
 void partirMinuterie(uint16_t duree)
 {
@@ -174,16 +203,86 @@ uint8_t distance(AnalogDigConv converter)
     }
 }
 
+
+void displayElapsedTime()
+{
+    char min[4];
+    char sec[4];
+    char cent[4];
+
+    sprintf(min, "%d", time.min);
+    strcat(min, ":");
+
+    sprintf(sec, "%d", time.sec);
+    strcat(sec, ".");
+
+    sprintf(cent, "%d", time.cent);
+    strcat(cent, " - ");
+
+    if(time.min < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    DEBUG_PRINT(min, 2);
+    
+    if(time.sec < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    
+    DEBUG_PRINT(sec, 2);
+
+    if(time.cent < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    DEBUG_PRINT(cent, 2); 
+}
+
 void display(float distances[], const char categories[], AnalogDigConv converter)
 {
+    //displayElapsedTime();
+    
+    char min[20];
+    char sec[20];
+    char cent[20];
+
+    sprintf(min, "%d", time.min);
+    strcat(min, ":");
+
+    sprintf(sec, "%d", time.sec);
+    strcat(sec, ".");
+
+    sprintf(cent, "%d", time.cent);
+    strcat(cent, " - ");
+
+    if(time.min < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    DEBUG_PRINT(min, sizeof(min));
+    
+    if(time.sec < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    
+    DEBUG_PRINT(sec, sizeof(sec));
+
+    if(time.cent < 10)
+    {
+        DEBUG_PRINT("0", 2);
+    }
+    DEBUG_PRINT(cent, sizeof(cent));
+
     float currentValue = 0.0F;
     const char msg[] = "Can interne: ";
     const char msg2[] = "Can externe: ";
     char buffer[BUFFER_SIZE] = {' '};
     const char *sides[] = {"G:", "C:", "D:"};
 
-    if(converter == AnalogDigConv::INTERNAL) { DEBUG_PRINT(msg, sizeof(msg)); }
-    else { DEBUG_PRINT(msg2, sizeof(msg2)); }
+    //if(converter == AnalogDigConv::INTERNAL) { DEBUG_PRINT(msg, sizeof(msg)); }
+    //else { DEBUG_PRINT(msg2, sizeof(msg2)); }
 
 
     for (uint8_t i = 0; i < 3; i++)
@@ -268,7 +367,7 @@ void afficheursDemarrage() {
 
 void startUpMode() 
 {
-    const char baudRate[] = "2400 bps\n";
+    const char baudRate[] = "9600 bps\n";
     DEBUG_PRINT(baudRate, sizeof(baudRate));
     
     afficheursDemarrage();
@@ -301,7 +400,7 @@ PressedButton pressButton(){
         //DDRC &= ~_BV(PC4) & ~_BV(PC3) & ~_BV(PC2);
         //PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
 
-        if (PINC & 0x04){
+        if (PINC & 0x04) {
             DDRC = 0x1C;
             PORTC = 0x04;
             //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
@@ -330,8 +429,10 @@ PressedButton pressButton(){
                     bouton = PressedButton::E;
                 }
                 else if (PINC & 0x40){
-					while(PINC & 0x40){};
-                    bouton = PressedButton::V;
+					//while(PINC & 0x40){};
+                    _delay_ms(300);
+                    if(PINC & 0x40)
+                        bouton = PressedButton::V;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
@@ -686,6 +787,7 @@ void addManeuverId(char categories[], uint8_t maneuverId)
 int main() {
     
     init();
+    partirMinuterie0();
 
     uint8_t adc = 0;
     float voltage = 0.0F;
@@ -712,7 +814,7 @@ int main() {
     
     // Mode demarrage
     startUpMode();
-    for(;;){
+    for(;;) {
         bouton = pressButton();
 
         switch(bouton){
@@ -884,6 +986,16 @@ int main() {
                 break;
 
             default:
+                initFrequence();
+                while (bouton == PressedButton::R || bouton == PressedButton::REPEAT){
+                    partirMinuterie(7812);
+
+                    do{
+                        bouton = pressButton();
+                    }while(lecture == 0);
+
+                    display(distances, categories, converter);
+                }
                 break;
         }
         }
