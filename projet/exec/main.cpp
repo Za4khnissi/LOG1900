@@ -17,8 +17,8 @@
 #define ONE_ 1
 
 
-volatile uint8_t maneuverId;
 
+volatile uint8_t maneuverId;
 volatile uint8_t lecture = 0;
 
 enum Frequency{
@@ -36,7 +36,7 @@ enum Maneuver {
     Invalid
 };
 
-enum pressedBouton{
+enum PressedButton {
     ONE,
     TWO,
     FOUR,
@@ -49,24 +49,27 @@ enum pressedBouton{
     REPEAT
 };
 
+
+
+
 enum Sensor
 {
-    left,
-    center,
-    right
+    LEFT,
+    CENTER,
+    RIGHT
 };
 
 enum AnalogDigConv
 {
-    internal = 12,
-    external
+    INTERNAL = 12,
+    EXTERNAL
 };
 
 enum DisplayMode
 {
-    RR = 20,
-    VV,
-    CC,
+    ON_FREQUENCY = 20,
+    ON_DISTANCE_CHANGE,
+    ON_CATEGORY_CHANGE,
     INIT
 };
 
@@ -90,16 +93,16 @@ void selectSensor(uint8_t sensor)
 {
     switch (sensor)
     {
-    case left:
+    case LEFT:
         PORTA &= ~((1 << PA2) | (1 << PA3));
         break;
 
-    case center:
+    case CENTER:
         PORTA |= (1 << PA2);
         PORTA &= ~(1 << PA3);
         break;
 
-    case right:
+    case RIGHT:
         PORTA |= (1 << PA3);
         PORTA &= ~(1 << PA2);
         break;
@@ -110,11 +113,11 @@ void selectCan(AnalogDigConv can)
 {
     switch (can)
     {
-    case internal:
+    case INTERNAL:
         PORTA &= ~(1 << PA0);
         break;
 
-    case external:
+    case EXTERNAL:
         PORTA |= (1 << PA0);
         break;
     }
@@ -123,7 +126,7 @@ void selectCan(AnalogDigConv can)
 uint8_t distance(AnalogDigConv converter)
 {
     selectCan(converter);
-    if (converter == AnalogDigConv::internal)
+    if (converter == AnalogDigConv::INTERNAL)
     {
         Can can;
         uint8_t volts = can.lecture(PA1) >> 2;
@@ -182,7 +185,7 @@ void display(float distances[], const char categories[], AnalogDigConv converter
     char buffer[BUFFER_SIZE] = {' '};
     const char *sides[] = {"G:", "C:", "D:"};
 
-    if(converter == AnalogDigConv::internal) { DEBUG_PRINT(msg, sizeof(msg)); }
+    if(converter == AnalogDigConv::INTERNAL) { DEBUG_PRINT(msg, sizeof(msg)); }
     else { DEBUG_PRINT(msg2, sizeof(msg2)); }
 
 
@@ -199,7 +202,7 @@ void display(float distances[], const char categories[], AnalogDigConv converter
         DEBUG_PRINT(sides[i], sizeof(sides[i]));
         DEBUG_PRINT(buffer, BUFFER_SIZE);
     }
-
+    DEBUG_PRINT("- ", 3);
     DEBUG_PRINT(categories, 40);
 }
 
@@ -272,7 +275,7 @@ void startUpMode()
     DEBUG_PRINT(baudRate, sizeof(baudRate));
     
     afficheursDemarrage();
-    
+
     Motor motor;
 
     motor.forward(254, 254);
@@ -292,9 +295,9 @@ void clear(char array[], uint8_t size)
     }
 }
 
-pressedBouton pressButton(){
+PressedButton pressButton(){
 
-        pressedBouton bouton;
+        PressedButton bouton;
         DDRC = 0xE0;
         PORTC = 0xE0;
         //DDRC |= _BV(PC7) | _BV(PC6) | _BV(PC5) 
@@ -308,15 +311,15 @@ pressedBouton pressButton(){
             //PORTC |= _BV(PC2);
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    bouton = pressedBouton::HASHTAG;
+                    bouton = PressedButton::HASHTAG;
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    bouton = pressedBouton::C;
+                    bouton = PressedButton::C;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    bouton = pressedBouton::FOUR;
+                    bouton = PressedButton::FOUR;
                 }
 
         }
@@ -327,15 +330,15 @@ pressedBouton pressButton(){
             //PORTC |= _BV(PC3);
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    bouton = pressedBouton::E;
+                    bouton = PressedButton::E;
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    bouton = pressedBouton::V;
+                    bouton = PressedButton::V;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    bouton = pressedBouton::TWO;
+                    bouton = PressedButton::TWO;
                 }
 
         }
@@ -346,19 +349,19 @@ pressedBouton pressButton(){
             //PORTC |= _BV(PC4);
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
-                    bouton = pressedBouton::I; 
+                    bouton = PressedButton::I; 
                 }
                 else if (PINC & 0x40){
 					while(PINC & 0x40){};
-                    bouton = pressedBouton::R;
+                    bouton = PressedButton::R;
                 }
                 else if (PINC & 0x20){
 					while(PINC & 0x20){};
-                    bouton = pressedBouton::ONE;
+                    bouton = PressedButton::ONE;
                 }
 		}
         else{
-            bouton = pressedBouton::REPEAT;
+            bouton = PressedButton::REPEAT;
         }
         return bouton;
 }
@@ -372,10 +375,12 @@ uint8_t checkCategory(float distance) {
         return 3;
 }
 
-uint8_t selectManeuver(float leftDistance, float centerDistance, float rightDistance) {
-    uint8_t left = checkCategory(leftDistance);
-    uint8_t center = checkCategory(centerDistance);
-    uint8_t right = checkCategory(rightDistance);
+uint8_t selectManeuver(float distances[])
+{
+    uint8_t index = 0;
+    uint8_t left = checkCategory(distances[index]);
+    uint8_t center = checkCategory(distances[index + 1]);
+    uint8_t right = checkCategory(distances[index + 2]);
 
     if(left == 3 && center == 2 && right == 2) 
         return 1;   // Manoeuvre 1
@@ -394,8 +399,7 @@ uint8_t selectManeuver(float leftDistance, float centerDistance, float rightDist
 
     else
         return 0;
-}   
-
+}
 
 void moteur(int ocr1b, int ocr1a) //roue droite recule
 {
@@ -433,8 +437,11 @@ void moteur(int ocr1b, int ocr1a) //roue droite recule
     PWM::adjustPWM(ocr1a, ocr1b);
 }
 
-void manoeuvre1()
+void maneuver1()
 {
+
+    char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
+    DEBUG_PRINT(mot, sizeof(mot));
 
     moteur(-35, 35);
     _delay_ms(1500);
@@ -457,8 +464,11 @@ void manoeuvre1()
     moteur(0, 0);
 }
 
-void manoeuvre2()
+void maneuver2()
 {
+
+    char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
+    DEBUG_PRINT(mot, sizeof(mot));
 
     moteur(35, -35);
     _delay_ms(1500);
@@ -481,7 +491,7 @@ void manoeuvre2()
     moteur(0, 0);
 }
 
-void manoeuvre3()
+void maneuver3()
 {
 
     moteur(-50, -50);
@@ -506,7 +516,7 @@ void manoeuvre3()
     moteur(0, 0);
 }
 
-void manoeuvre4()
+void maneuver4()
 {
 
     moteur(78, 78);
@@ -532,7 +542,7 @@ void manoeuvre4()
     moteur(0, 0);
 }
 
-void manoeuvre5()
+void maneuver5()
 {
 
     moteur(78, 78);
@@ -562,33 +572,29 @@ void manoeuvre5()
 ISR (INT0_vect) {
 
     if(maneuverId == 1) {
-        char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        manoeuvre1();
+        maneuver1();
     }
 
     else if(maneuverId == 2){
-        char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        manoeuvre2();
+        maneuver2();
     }
 
     else if(maneuverId == 3) {
         char mot[] = "Manoeuvre 3 ( DANGER - DANGER - DANGER) \n";
         DEBUG_PRINT(mot, sizeof(mot));
-        manoeuvre3();
+        maneuver3();
     }
 
     else if(maneuverId == 4) {
         char mot[] = "Manoeuvre 4 (OK - OK - DANGER) \n";
         DEBUG_PRINT(mot, sizeof(mot));
-        manoeuvre4();
+        maneuver4();
     }
 
     else if(maneuverId == 5){
         char mot[] = "Manoeuvre 5 (DANGER - OK - OK) \n";
         DEBUG_PRINT(mot, sizeof(mot));
-        manoeuvre5();
+        maneuver5();
     }
     else if(maneuverId == 0) {
         //Invalid Maneuver
@@ -632,6 +638,32 @@ void initFrequence(){
     sei();
 }
 
+void addManeuverId(char categories[], uint8_t maneuverId)
+{
+    switch (maneuverId)
+    {
+    case 1:
+        strcat(categories, " (1)\n");
+        break;
+    case 2:
+        strcat(categories, " (2)\n");
+        break;
+    case 3:
+        strcat(categories, " (3)\n");
+        break;
+    case 4:
+        strcat(categories, " (4)\n");
+        break;
+    case 5:
+        strcat(categories, " (5)\n");
+        break;
+    
+    default:
+        strcat(categories, " (-)\n");
+        break;
+    }
+}
+
 int main() {
     
     init();
@@ -648,14 +680,16 @@ int main() {
     
     float distances[3] = {0, 0, 0};
     bool distChanged = false;
+    PressedButton  bouton;
 
     char categories[40] = "";
+    uint8_t maneuverId = 0;
     bool categoryChanged = false;
 
-    pressedBouton bouton;
     DisplayMode displayMode = DisplayMode::INIT;
     Frequency frequency = O;
-    AnalogDigConv converter = AnalogDigConv::internal;
+    
+    AnalogDigConv converter = AnalogDigConv::INTERNAL;
     
     // Mode demarrage
     startUpMode();
@@ -663,49 +697,47 @@ int main() {
         bouton = pressButton();
 
         switch(bouton){
-            case pressedBouton::ONE:
+            case PressedButton ::ONE:
                 DEBUG_PRINT("Le bouton 1 du clavier a ete appuye.\n", 38);
-                frequency = Frequency::O;
             break;
-            case pressedBouton::TWO:
+            case PressedButton ::TWO:
                 DEBUG_PRINT("Le bouton 2 du clavier a ete appuye.\n", 38);
-                frequency = Frequency::T;
             break;
-            case pressedBouton::FOUR:
+            case PressedButton ::FOUR:
                 DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", 38);
-                frequency = Frequency::F;
             break;
-            case pressedBouton::R:
+            case PressedButton ::R:
                 DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", 38);
-                displayMode = DisplayMode::RR;
+                displayMode = DisplayMode::ON_FREQUENCY;
             break;
-            case pressedBouton::V:
+            case PressedButton ::V:
                 DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", 38);
-                displayMode = DisplayMode::VV;
+                displayMode = DisplayMode::ON_DISTANCE_CHANGE;
             break;
-            case pressedBouton::C:
+            case PressedButton ::C:
                 DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", 38);
-                displayMode = DisplayMode::CC;
+                displayMode = DisplayMode::ON_CATEGORY_CHANGE;
             break;
-            case pressedBouton::I:
+            case PressedButton ::I:
                 DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", 38);
-                converter = AnalogDigConv::internal;
+                converter = AnalogDigConv::INTERNAL;
             break;
-            case pressedBouton::E:
+            case PressedButton ::E:
                 DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", 38);
-                converter = AnalogDigConv::external;
+                converter = AnalogDigConv::EXTERNAL;
             break;
-            case pressedBouton::HASHTAG:
+            case PressedButton ::HASHTAG:
                 DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 38);
             break;
         }
         
-        for (uint8_t sensorIndex = 0 ; sensorIndex < 3; sensorIndex++)
+
+        for (uint8_t sensorIndex = 0; sensorIndex < 3; sensorIndex++)
         {
             
             previousDist = distances[sensorIndex];
+
             selectSensor(sensorIndex);
-            // permettre d echager de can après un appui sur le clavier
             adc = distance(converter); 
             voltage = adc * CONV_FACTOR;
             currentDist = 28.998F * pow(voltage, -1.141F);
@@ -720,11 +752,17 @@ int main() {
                 rightSensorDist = currentDist;
             }
 
-            maneuverId = selectManeuver(leftSensorDist, centerSensorDist, rightSensorDist);
+            //maneuverId = selectManeuver(leftSensorDist, centerSensorDist, rightSensorDist);
 
             if (currentDist <= MIN_DISTANCE)
             {
                 currentDist = MIN_DISTANCE;
+            }
+            
+            if (previousDist  != currentDist)
+            {
+                distChanged = true;
+                distances[sensorIndex] = currentDist;
             }
             
             if(selectCategory(previousDist) != selectCategory(currentDist))
@@ -732,84 +770,78 @@ int main() {
                 categoryChanged = true;
             }
 
-            if (previousDist  != currentDist)
-            {
-                distChanged = true;
-                distances[sensorIndex] = currentDist;
-            }
-        
-
             // concatenation
             strcat(categories, selectCategory(currentDist)); 
 
             // Si on a pris les mesures sur tous les capteurs, celui de droite etant le dernier
-            if (sensorIndex != Sensor::right){
-                strcat(categories, "|");
+            if (sensorIndex != Sensor::RIGHT)
+            {
+                strcat(categories, " | ");
             } 
-            else {
-                strcat(categories, "\n"); //
-            }
         }
+
+        maneuverId = selectManeuver(distances);
+        addManeuverId(categories, maneuverId);
 
         switch (displayMode)
         {
-            case DisplayMode::RR:
-                while(bouton == pressedBouton::ONE || bouton == pressedBouton::TWO || bouton == pressedBouton::FOUR || bouton == pressedBouton::R){
+            case DisplayMode::ON_FREQUENCY:
+                while(bouton == PressedButton::ONE || bouton == PressedButton::TWO || bouton == PressedButton::FOUR || bouton == PressedButton::R){
                         
                     switch(bouton){
-                        
-                        case pressedBouton::ONE:
+
+                        case PressedButton::ONE:
                         {
                         initFrequence();
-                        while (bouton == pressedBouton::ONE || bouton == pressedBouton::REPEAT){
+                        while (bouton == PressedButton::ONE || bouton == PressedButton::REPEAT){
                             partirMinuterie(7812);
                             do{
 
                             }while(lecture == 0);
+                            bouton = pressButton();
                                 display(distances, categories, converter);
 
-                            bouton = pressButton();
                         }
                         break;
                         }
 
-                        case pressedBouton::TWO:
+                        case PressedButton::TWO:
                         {
                             initFrequence();
-                        while (bouton == pressedBouton::TWO || bouton == pressedBouton::REPEAT){
+                        while (bouton == PressedButton::TWO || bouton == PressedButton::REPEAT){
                             partirMinuterie(7812/2);
                             do{
 
                             }while(lecture == 0);
-                                display(distances, categories, converter);
                             bouton = pressButton();
+                                display(distances, categories, converter);
                         }
                         break;
                         }
 
-                        case pressedBouton::FOUR:
+                        case PressedButton::FOUR:
                         {
                             initFrequence();
-                        while (bouton == pressedBouton::FOUR || bouton == pressedBouton::REPEAT){
+                        while (bouton == PressedButton::FOUR || bouton == PressedButton::REPEAT){
                             partirMinuterie(7812/4);
                             do{
-
-                            }while(lecture == 0);
-                                display(distances, categories, converter);
+                                
+                            }while(lecture == 0 );
                             bouton = pressButton();
+                                display(distances, categories, converter);
                         }
                         break;
                         }
                         default:
                         {
                             initFrequence();
-                        while (bouton == pressedBouton::R || bouton == pressedBouton::REPEAT){
+                        while (bouton == PressedButton::R || bouton == PressedButton::REPEAT){
                             partirMinuterie(7812);
                             do{
 
                             }while(lecture == 0);
-                                display(distances, categories, converter);
-                            bouton = pressButton();
+                                bouton = pressButton();
+                            display(distances, categories, converter);
                         }
                         break;
                     }
@@ -817,7 +849,7 @@ int main() {
                 }
                 break;
             
-            case DisplayMode::VV:
+            case DisplayMode::ON_DISTANCE_CHANGE:
 
                 if (distChanged)
                 {
@@ -826,7 +858,7 @@ int main() {
                 }
                 break;
 
-            case DisplayMode::CC:
+            case DisplayMode::ON_CATEGORY_CHANGE:
             
                 if(categoryChanged)
                 {
