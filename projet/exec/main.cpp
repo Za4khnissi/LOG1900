@@ -391,7 +391,7 @@ void clear(char array[], uint8_t size)
     }
 }
 
-PressedButton pressButton(){
+PressedButton detectPressedButton(){
 
         PressedButton bouton;
         DDRC = 0xE0;
@@ -473,30 +473,6 @@ uint8_t checkCategory(float distance) {
         return 3;
 }
 
-/* uint8_t selectManeuver(float leftDistance, float centerDistance, float rightDistance) {
-    uint8_t left = checkCategory(leftDistance);
-    uint8_t center = checkCategory(centerDistance);
-    uint8_t right = checkCategory(rightDistance);
-
-    if(left == 3 && center == 2 && right == 2) 
-        return 1;   // Manoeuvre 1
-
-    else if(left == 2 && center == 2 && right == 3)
-        return 2;   // Manoeuvre 2
-
-    else if(left == 1 && center == 1 && right == 1)
-        return 3;   // Manoeuvre 3
-
-    else if(left == 3 && center == 3 && right == 1)
-        return 4;   // Manoeuvre 4
-
-    else if(left == 1 && center == 3 && right == 3)
-        return 5;   // Manoeuvre 5
-
-    else
-        return 0;
-}    */
-
 uint8_t selectManeuver(float distances[])
 {
     uint8_t index = 0;
@@ -523,36 +499,36 @@ uint8_t selectManeuver(float distances[])
         return 0;
 }
 
-void moteur(int ocr1b, int ocr1a) //roue droite recule
+void moteur(int8_t ocr1b, int8_t ocr1a)
 {
     if(ocr1a < 0)
     {
-        PORTD |= _BV(PD3);                 //gauche  ocr1b
-        PORTD &= ~_BV(PD6);                //droite  ocr1a
+        PORTD |= _BV(PD3);                 
+        PORTD &= ~_BV(PD6);                
         ocr1b = (ocr1b*255)/100;
         ocr1a = (-1*(ocr1a*255))/100;
     }
 
     else if((ocr1b > 0) & (ocr1a > 0))
     {
-        PORTD |= _BV(PD3);                 //gauche  ocr1b
-        PORTD |= _BV(PD6);                  //droite  ocr1a
+        PORTD |= _BV(PD3);            
+        PORTD |= _BV(PD6);                  
         ocr1b = (ocr1b*255)/100;
         ocr1a = (ocr1a*255)/100;
     }
 
     else if(ocr1b < 0)
     {
-        PORTD &= ~_BV(PD3);                 //gauche  ocr1b
-        PORTD |= _BV(PD6);                  //droite  ocr1a
+        PORTD &= ~_BV(PD3);                 
+        PORTD |= _BV(PD6);                  
         ocr1b = (-1*(ocr1b*255))/100;
         ocr1a = (ocr1a*255)/100;
     }
 
     else if((ocr1a < 0) & (ocr1b < 0))
     {
-        PORTD &= ~_BV(PD3);                 //gauche  ocr1b
-        PORTD &= ~_BV(PD6);                  //droite  ocr1a
+        PORTD &= ~_BV(PD3);                 
+        PORTD &= ~_BV(PD6);                  
         ocr1b = (-1*(ocr1b*255))/100;
         ocr1a = (-1*(ocr1a*255))/100;
     }
@@ -573,7 +549,7 @@ void maneuver1()
 
     moteur(35, 35);         //pas necessaire mais juste pour respecter le consigne
 
-    for(int i = 35; i <= 95; i = i+5)
+    for(uint8_t i = 35; i <= 95; i = i+5)
     {
         moteur(i, i);
         _delay_ms(125);
@@ -597,7 +573,7 @@ void maneuver2()
 
     moteur(35, 35);
 
-    for(int i = 35; i < 95; i = i+5)
+    for(uint8_t i = 35; i < 95; i = i+5)
     {
         moteur(i, i);
         _delay_ms(125);
@@ -616,13 +592,13 @@ void maneuver3()
     moteur(-70, 70);
     _delay_ms(1500);
 
-    for(int i = 0; i <= 99; i = i+3)
+    for(uint8_t i = 0; i <= 99; i = i+3)
     {
         moteur(i, i);
         _delay_ms(50);
     }
 
-    for(int i = 99; i >= 74; i = i-5)
+    for(uint8_t i = 99; i >= 74; i = i-5)
     {
         moteur(i, i);
         _delay_ms(500);
@@ -637,7 +613,7 @@ void maneuver4()
 
     moteur(78, 78);
 
-    int i = 78;
+    uint8_t i = 78;
 
     for(; i >= 48; i = i-2)
     {
@@ -663,7 +639,7 @@ void maneuver5()
 
     moteur(78, 78);
 
-    int i = 78;
+    uint8_t i = 78;
 
     for(; i >= 48; i = i-2)
     {
@@ -815,7 +791,7 @@ int main() {
     // Mode demarrage
     startUpMode();
     for(;;) {
-        bouton = pressButton();
+        bouton = detectPressedButton();
 
         switch(bouton){
             case PressedButton ::ONE:
@@ -919,7 +895,7 @@ int main() {
                                 //DEBUG_PRINT("HERE", 5);
                                 display(distances, categories, converter);
 
-                                bouton = pressButton();
+                                bouton = detectPressedButton();
                             
                             break;
                             }
@@ -932,7 +908,7 @@ int main() {
                             do{
                             }while(lecture == 0);
                             display(distances, categories, converter);
-                            bouton = pressButton();
+                            bouton = detectPressedButton();
                         }
                         break;
                         }
@@ -946,7 +922,7 @@ int main() {
 
                             }while(lecture == 0);
                             display(distances, categories, converter);
-                            bouton = pressButton();
+                            bouton = detectPressedButton();
                         }
                         break;
                         }
@@ -959,11 +935,11 @@ int main() {
 
                             }while(lecture == 0);
                             display(distances, categories, converter);
-                            bouton = pressButton();
+                            bouton = detectPressedButton();
                         }
                         break;
                     }
-                    bouton = pressButton(); 
+                    bouton = detectPressedButton(); 
                 }
                 break;
             
@@ -991,7 +967,7 @@ int main() {
                     partirMinuterie(7812);
 
                     do{
-                        bouton = pressButton();
+                        bouton = detectPressedButton();
                     }while(lecture == 0);
 
                     display(distances, categories, converter);
