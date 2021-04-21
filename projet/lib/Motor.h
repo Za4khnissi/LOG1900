@@ -19,6 +19,5 @@ public:
     void stop();
 };
 
-
-
 #endif //WHEEL_H
+

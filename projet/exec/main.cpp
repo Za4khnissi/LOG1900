@@ -1,82 +1,25 @@
 #define F_CPU 8000000UL
 #include <avr/interrupt.h>
-#include <avr/io.h>
-#include <util/delay.h>
-#include <avr/eeprom.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "Can.h"
 #include "UART.h"
 #include "debug.h"
 #include "Motor.h"
+#include "Sensor.h"
+#include "Converter.h"
+#include "Maneuver.h"
+#include "Keyboard.h"
+#include "Display.h"
+#include "Time.h"
 
-#define BUFFER_SIZE 20
-#define MIN_DISTANCE 10.0F
 #define CONV_FACTOR 5.0F / 255.0F
+#define DEFAULT_FREQUENCE 7812
 #define ONE_ 1
 
-#define DEFAULT_FREQUENCE 7812
-#define MAX_DISPALY_ARRAY_SIZE 73
 
 volatile uint8_t maneuverId;
 volatile uint8_t lecture = 0;
 
-enum Frequence{
-    O, // one
-    T, // two
-    F  // four
-};
-
-enum Maneuver {
-    M1,
-    M2,
-    M3,
-    M4,
-    M5,
-    Invalid
-};
-
-enum PressedButton {
-    ONE,
-    TWO,
-    FOUR,
-    R,
-    V,
-    C,
-    I,
-    E,
-    HASHTAG,
-    REPEAT
-};
-
-enum Sensor
-{
-    LEFT,
-    CENTER,
-    RIGHT
-};
-
-enum AnalogDigConv
-{
-    INTERNAL,
-    EXTERNAL
-};
-
-enum DisplayMode
-{
-    ON_FREQUENCE,
-    ON_DISTANCE_CHANGE,
-    ON_CATEGORY_CHANGE,
-    INIT
-};
-
-
-struct Time {
-    uint8_t min = 0, sec = 0, cent = 0;
-};
-
-volatile Time time;
 
 void moteur(int8_t ocr1b, int8_t ocr1a)
 {
@@ -325,279 +268,7 @@ void partirMinuterie(uint16_t duree)
     TIMSK1 = 1 << OCIE1A;
 }
 
-void selectSensor(uint8_t sensor)
-{
-    switch (sensor)
-    {
-    case LEFT:
-        PORTA &= ~((1 << PA2) | (1 << PA3));
-        break;
-
-    case CENTER:
-        PORTA |= (1 << PA2);
-        PORTA &= ~(1 << PA3);
-        break;
-
-    case RIGHT:
-        PORTA |= (1 << PA3);
-        PORTA &= ~(1 << PA2);
-        break;
-    }
-}
-
-void selectCan(AnalogDigConv can)
-{
-    switch (can)
-    {
-    case INTERNAL:
-        PORTA &= ~(1 << PA0);
-        break;
-
-    case EXTERNAL:
-        PORTA |= (1 << PA0);
-        break;
-    }
-}
-
-uint8_t computeConversion(AnalogDigConv converter)
-{
-    selectCan(converter);
-    if (converter == AnalogDigConv::INTERNAL)
-    {
-        Can can;
-        uint8_t volts = can.lecture(PA1) >> 2;
-        return volts; //* (5/1024);
-    }
-    else
-    {
-        uint8_t result = 0;
-        PORTB &= ~(1 << PB2) & ~(1 << PB3) & ~(1 << PB4);
-
-        PORTB |= (1 << PB2) | (1 << PB3) | (1 << PB4); //MUX D7
-        _delay_ms(10);
-        result = PINB & (1 << PB1);       //0000 0001
-        PORTB |= (1 << PB3) | (1 << PB4); //MUX D6
-        PORTB &= ~(1 << PB2);
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 1; //0000 0011
-
-        PORTB |= (1 << PB2) | (1 << PB4); //MUX D5
-        PORTB &= ~(1 << PB3);
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 2;
-
-        PORTB |= (1 << PB4); //MUX D4
-        PORTB &= ~((1 << PB2) | (1 << PB3));
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 3;
-
-        PORTB |= (1 << PB2) | (1 << PB3); //MUX D3
-        PORTB &= ~(1 << PB4);
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 4;
-
-        PORTB |= (1 << PB3); //MUX D2
-        PORTB &= ~((1 << PB2) | (1 << PB4));
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 5;
-
-        PORTB |= (1 << PB2); //MUX D1
-        PORTB &= ~((1 << PB3) | (1 << PB4));
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 6;
-
-        PORTB &= ~((1 << PB2) | (1 << PB3) | (1 << PB4)); //MUX D0
-        _delay_ms(10);
-        result += (PINB & (1 << PB1)) << 7;
-        return result >> 1;
-    }
-}
-
-
-void concatenateElapsedTime(char* elapsedTime)
-{
-    char buf[4];
-
-    if(time.min < 10)
-    {
-        strcat(elapsedTime, "0");
-    }
-
-    sprintf(buf, "%d", time.min);
-    strcat(elapsedTime, buf);
-
-    strcat(elapsedTime, ":");
-
-    if(time.sec < 10)
-    {
-        strcat(elapsedTime, "0");
-    }
-
-    sprintf(buf, "%d", time.sec);
-    strcat(elapsedTime, buf);
-
-    strcat(elapsedTime, ".");
-
-    if(time.cent < 10)
-    {
-        strcat(elapsedTime, "0");
-    }
-
-    sprintf(buf, "%d", time.cent);
-    strcat(elapsedTime, buf);
-
-    strcat(elapsedTime, " - ");
-
-}
-
-void display(float distances[], const char categories[], AnalogDigConv converter)
-{
-    char buffer[MAX_DISPALY_ARRAY_SIZE] = "";
-    char numbersBuffer[9] = "";
-    const char *sides[] = {"G:", "C:", "D:"};
-
-    const char msg[] = "Can interne: ";
-    const char msg2[] = "Can externe: ";
-
-    char elapsedTime[13] = "";
-    concatenateElapsedTime(elapsedTime);
-    strcat(buffer, elapsedTime);
-
-    float currentValue = 0.0F;
-
-    //if(converter == AnalogDigConv::INTERNAL) { DEBUG_PRINT(msg, sizeof(msg)); }
-    //else { DEBUG_PRINT(msg2, sizeof(msg2)); }
-
-    for (uint8_t i = 0; i < 3; i++)
-    {
-        currentValue = distances[i];
-        
-        // partie entiere
-        uint8_t ipart = (uint8_t)currentValue;
-        
-        // partie flottante
-        float fpart = (currentValue - ipart) * 10;
-        uint8_t fracPart = (uint8_t)fpart;
-    
-        sprintf(numbersBuffer, "%d.%d ", ipart, fracPart);
-
-        strcat(buffer, sides[i]);
-        strcat(buffer, numbersBuffer);
-
-    }
-
-    strcat(buffer, "- ");
-    strcat(buffer, categories);
-    DEBUG_PRINT(buffer, MAX_DISPALY_ARRAY_SIZE);
-}
-
-const char *selectCategory(float distance)
-{
-    const char *category = "";
-
-    if (distance >= MIN_DISTANCE && distance < 20.0F)
-    {
-        category = "DANGER";
-    }
-    else if (distance >= 20.0F && distance < 50.0F)
-    {
-        category = "ATTENTION";
-    }
-    else
-    {
-        category = "OK";
-    }
-    return category;
-}
-
-void eteindreAfficheurs() 
-{
-    PORTB |= (1 << PORTB7);
-    PORTD |= (1 << PORTD7);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-}
-
-void afficheursDemarrage() {
-
-    //Affichage de A sur le premier afficheur
-    PORTB &= ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC0) & ~(1 << PORTC1);
-    PORTB = (1 << PORTB5);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= (1 << PORTA7) | (1 << PORTA5);
-    _delay_ms(50);
-    //Affichage de B sur le 2e afficheur
-    PORTB &= ~(1 << PORTB5);
-    PORTC &= ~(1 << PORTC0) & ~(1 << PORTC1);
-    PORTB = (1 << PORTB6);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= (1 << PORTA7) | (1 << PORTA5) | (1 << PORTA4);
-    _delay_ms(50);
-    //Affichage de C sur le 3e afficheur
-    PORTB &= ~(1 << PORTB5) & ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC1);
-    PORTC = (1 << PORTC0);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= (1 << PORTA7) | (1 << PORTA6);
-    _delay_ms(50);
-    //Affichage de D sur le 4e afficheur
-    PORTB &= ~(1 << PORTB5) & ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC0);
-    PORTC = (1 << PORTC1);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= (1 << PORTA7) | (1 << PORTA6) | (1 << PORTA4);
-    _delay_ms(50);
-
-    _delay_ms(2000);
-
-    //Eteindre afficheurs 
-    eteindreAfficheurs();
-}
-
-void afficheursGauche(uint8_t vitesse) {
-    uint8_t droite = vitesse % 10;
-    uint8_t temp = vitesse - droite;
-    uint8_t gauche = temp / 10;
-    
-
-    PORTB &= ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC0) & ~(1 << PORTC1);
-    PORTB = (1 << PORTB5);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= gauche << 4;
-    _delay_ms(50);
-
-    // 0000 0011  ===>   0   0   1  1     0   0   0   0
-    //                  a7  a6  a5  a4   a3  a2   a1  a0
-    
-    PORTB &= ~(1 << PORTB5);
-    PORTC &= ~(1 << PORTC0) & ~(1 << PORTC1);
-    PORTB = (1 << PORTB6);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= droite << 4;;
-    _delay_ms(50);
-}
-
-void afficheursDroite(uint8_t vitesse) {
-    uint8_t droite = vitesse % 10;
-    uint8_t temp = vitesse - droite;
-    uint8_t gauche = temp / 10;
-
-    PORTB &= ~(1 << PORTB5) & ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC1);
-    PORTC = (1 << PORTC0);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= gauche << 4;
-    _delay_ms(50);
-    
-    PORTB &= ~(1 << PORTB5) & ~(1 << PORTB6);
-    PORTC &= ~(1 << PORTC0);
-    PORTC = (1 << PORTC1);
-    PORTA &= ~(1 << PORTA7) & ~(1 << PORTA6) & ~(1 << PORTA5) & ~(1 << PORTA4);
-    PORTA |= droite << 4;
-    _delay_ms(50);
-}
-
+// Mode demarrage
 void startUpMode() 
 {
     const char baudRate[] = "9600 bps\n";
@@ -615,6 +286,10 @@ void startUpMode()
     
 }
 
+/** Vide un tableau de caracteres passe en parametre
+ * @param array tableau a vider
+ * @param size taille du tableau a vider 
+ */
 void clear(char array[], uint8_t size)
 {
     
@@ -623,111 +298,6 @@ void clear(char array[], uint8_t size)
         array[i] = '\0';
     }
 }
-
-PressedButton detectPressedButton(){
-
-        PressedButton bouton = PressedButton::REPEAT;
-        DDRC = 0xE0;
-        PORTC = 0xE0;
-        //DDRC |= _BV(PC7) | _BV(PC6) | _BV(PC5) 
-        //DDRC &= ~_BV(PC4) & ~_BV(PC3) & ~_BV(PC2);
-        //PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
-
-        if (PINC & 0x04) { // 0000 0100
-            DDRC = 0x1C;
-            PORTC = 0x04;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC2);
-
-                if (PINC & 0x80){ // 1000 0000
-					while(PINC & 0x80){};
-                    bouton = PressedButton::HASHTAG;
-                }
-                else if (PINC & 0x40){
-					while(PINC & 0x40){};
-                    bouton = PressedButton::C;
-                }
-                else if (PINC & 0x20){
-					while(PINC & 0x20){};
-                    bouton = PressedButton::FOUR;
-                }
-
-        }
-        else if (PINC & 0x08){
-            DDRC = 0x1C;
-            PORTC = 0x08;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC3);
-                if (PINC & 0x80){
-					while(PINC & 0x80){};
-                    bouton = PressedButton::E;
-                }
-                else if (PINC & 0x40){
-					while(PINC & 0x40){};
-                    bouton = PressedButton::V;
-                }
-                else if (PINC & 0x20){
-					while(PINC & 0x20){};
-                    bouton = PressedButton::TWO;
-                }
-
-        }
-        else if (PINC & 0x10){ 
-            DDRC = 0x1C;
-            PORTC = 0x10;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC4);
-                if (PINC & 0x80){
-					while(PINC & 0x80){};
-                    bouton = PressedButton::I; 
-                }
-                else if (PINC & 0x40){
-					while(PINC & 0x40){};
-                    bouton = PressedButton::R;
-                }
-                else if (PINC & 0x20){
-					while(PINC & 0x20){};
-                    bouton = PressedButton::ONE;
-                }
-		}
-        return bouton;
-}
-
-uint8_t checkCategory(float distance) {
-    if (distance >= MIN_DISTANCE && distance < 20.0F)
-        return 1;
-    else if (distance >= 20.0F && distance < 50.0F)
-        return 2;
-    else
-        return 3;
-}
-
-uint8_t selectManeuver(float distances[])
-{
-    uint8_t index = 0;
-    uint8_t left = checkCategory(distances[index]);
-    uint8_t center = checkCategory(distances[index + 1]);
-    uint8_t right = checkCategory(distances[index + 2]);
-
-    if(left == 3 && center == 2 && right == 2) 
-        return 1;   // Manoeuvre 1
-
-    else if(left == 2 && center == 2 && right == 3)
-        return 2;   // Manoeuvre 2
-
-    else if(left == 1 && center == 1 && right == 1)
-        return 3;   // Manoeuvre 3
-
-    else if(left == 3 && center == 3 && right == 1)
-        return 4;   // Manoeuvre 4
-
-    else if(left == 1 && center == 3 && right == 3)
-        return 5;   // Manoeuvre 5
-
-    else
-        return 0;
-}
-
 
 void init ( void ) {
     cli ();
@@ -752,35 +322,10 @@ void init ( void ) {
 
 void initFrequence(){
     cli();
-    DDRD &= ~_BV(PD4) & ~_BV(PD5);
+    DDRD &= ~_BV(PD4) | ~_BV(PD5);
     sei();
 }
 
-void addManeuverId(char categories[], uint8_t maneuverId)
-{
-    switch (maneuverId)
-    {
-    case 1:
-        strcat(categories, " (1)\n");
-        break;
-    case 2:
-        strcat(categories, " (2)\n");
-        break;
-    case 3:
-        strcat(categories, " (3)\n");
-        break;
-    case 4:
-        strcat(categories, " (4)\n");
-        break;
-    case 5:
-        strcat(categories, " (5)\n");
-        break;
-    
-    default:
-        strcat(categories, " (-)\n");
-        break;
-    }
-}
 
 int main() {
     
@@ -789,8 +334,6 @@ int main() {
 
     uint8_t adc = 0;
     float voltage = 0.0F;
-
-    Maneuver maneuver;
 
     float previousDist = 0.0F;
     float currentDist = 0.0F;
@@ -815,6 +358,7 @@ int main() {
 
         bouton = detectPressedButton();
 
+        initFrequence();
         partirMinuterie(frequence);
         do {} while (lecture == 0);
 
