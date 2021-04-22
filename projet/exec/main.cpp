@@ -197,10 +197,10 @@ int main() {
     float currentDist = 0.0F;
     
     float distances[3] = {0, 0, 0};
-    bool distChanged = false;
+    bool distChanged = true;
 
     char categories[MAX_SIZE] = "";
-    bool categoryChanged = false;
+    bool categoryChanged = true;
 
     PressedButton  bouton;
     DisplayMode displayMode = DisplayMode::ON_FREQUENCE;

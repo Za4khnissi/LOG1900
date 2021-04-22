@@ -1,0 +1,10 @@
+- Lorsque la lecture des distances se fait a 4 foix/s, l'appui sur un autre bouton ne se fait pas instantanement. Donc il faut appuyer pour 0.3 s plus longtemps.
+
+Sinon notre programme fonctionne correctement.
+
+
+
+
+
+
+
