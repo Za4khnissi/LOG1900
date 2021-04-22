@@ -19,19 +19,14 @@ enum PressedButton {
 PressedButton detectPressedButton() {
 
         PressedButton bouton = PressedButton::REPEAT;
-        DDRC = 0xE0;
+        DDRC = 0xE3;
         PORTC = 0xE0;
-        //DDRC |= _BV(PC7) | _BV(PC6) | _BV(PC5) 
-        //DDRC &= ~_BV(PC4) & ~_BV(PC3) & ~_BV(PC2);
-        //PORTC |= _BV(PC7) | _BV(PC6) | _BV(PC5);
+    
+        if (PINC & 0x04) { 
+            DDRC = 0x1F; 
+            PORTC = 0x04; 
 
-        if (PINC & 0x04) { // 0000 0100
-            DDRC = 0x1C;
-            PORTC = 0x04;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC2);
-
-                if (PINC & 0x80){ // 1000 0000
+                if (PINC & 0x80){ 
 					while(PINC & 0x80){};
                     bouton = PressedButton::HASHTAG;
                 }
@@ -46,10 +41,9 @@ PressedButton detectPressedButton() {
 
         }
         else if (PINC & 0x08){
-            DDRC = 0x1C;
+            DDRC = 0x1F;
             PORTC = 0x08;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC3);
+
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
                     bouton = PressedButton::E;
@@ -65,10 +59,9 @@ PressedButton detectPressedButton() {
 
         }
         else if (PINC & 0x10){ 
-            DDRC = 0x1C;
+            DDRC = 0x1F;
             PORTC = 0x10;
-            //DDRC |= ~_BV(PC7) | ~_BV(PC6) | ~_BV(PC5) | _BV(PC4) | _BV(PC3) | _BV(PC2);
-            //PORTC |= _BV(PC4);
+            
                 if (PINC & 0x80){
 					while(PINC & 0x80){};
                     bouton = PressedButton::I; 

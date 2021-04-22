@@ -1,49 +1,249 @@
 #ifndef MANEUVER_H
 #define MANEUVER_H
 #include <avr/io.h>
-#define MIN_DISTANCE 10.0F
+#include "Display.h"
+#include "Category.h"
 
-enum Maneuver {
-    M1,
-    M2,
-    M3,
-    M4,
-    M5,
-    Invalid
-};
+void move(int8_t ocr1b, int8_t ocr1a)
+{
+    if((ocr1a < 0) && (ocr1b > 0))
+    {
+        PORTD |= _BV(PD3);                 
+        PORTD &= ~_BV(PD6);                
+        ocr1b = (ocr1b*255)/100;
+        ocr1a = (-1*(ocr1a*255))/100;
+    }
 
-uint8_t checkCategory(float distance) {
-    if (distance >= MIN_DISTANCE && distance < 20.0F)
-        return 1;
-    else if (distance >= 20.0F && distance < 50.0F)
-        return 2;
-    else
-        return 3;
+    else if((ocr1b > 0) && (ocr1a > 0))
+    {
+        PORTD |= _BV(PD3);            
+        PORTD |= _BV(PD6);                  
+        ocr1b = (ocr1b*255)/100;
+        ocr1a = (ocr1a*255)/100;
+    }
+
+    else if((ocr1b < 0) && (ocr1a > 0))
+    {
+        PORTD &= ~_BV(PD3);                 
+        PORTD |= _BV(PD6);                  
+        ocr1b = (-1*(ocr1b*255))/100;
+        ocr1a = (ocr1a*255)/100;
+    }
+
+    else if((ocr1a < 0) && (ocr1b < 0))
+    {
+        PORTD &= ~_BV(PD3);                 
+        PORTD &= ~_BV(PD6);                  
+        ocr1b = (-1*(ocr1b*255))/100;
+        ocr1a = (-1*(ocr1a*255))/100;
+    }
+    PWM::adjustPWM(ocr1a, ocr1b);
 }
 
-/** Selectionne la categorie a laquelle appartient une distance
- * 
- * @param distance distance dont on veut evaluer la categorie
- * @return categorie a laquelle appartient la distance passee en parametre
- * 
- */
-const char *selectCategory(float distance)
+void maneuver1(bool hex)
 {
-    const char *category = "";
+    display7off(false);
 
-    if (distance >= MIN_DISTANCE && distance < 20.0F)
+    move(-35, 35);
+    leftDisplays7(35, hex);
+    rightDisplays7(35, hex); 
+    _delay_ms(1500);
+
+    move(35, 35);
+    _delay_ms(2000);
+
+    move(35, -35);
+    _delay_ms(1500);
+
+    move(35, 35); 
+
+    for(uint8_t i = 35; i <= 95; i = i+5)
     {
-        category = "DANGER";
+
+        move(i, i);
+        leftDisplays7(i, hex);
+        rightDisplays7(i, hex);
+    
+        _delay_ms(125);
     }
-    else if (distance >= 20.0F && distance < 50.0F)
+
+    _delay_ms(2000);
+    move(0, 0);
+    display7off(true);
+}
+
+void maneuver2( bool hex)
+{
+    display7off(false);
+
+    move(35, -35);
+    leftDisplays7(35, hex);
+    rightDisplays7(35, hex);
+    _delay_ms(1500);
+
+    move(35, 35);
+    _delay_ms(2000);
+
+    move(-35, 35);
+    _delay_ms(1500);
+
+    move(35, 35);
+
+    for(uint8_t i = 35; i < 95; i = i+5)
     {
-        category = "ATTENTION";
+        move(i, i);
+        leftDisplays7(i, hex);
+        rightDisplays7(i, hex);
+        _delay_ms(125);
     }
-    else
+
+    _delay_ms(2000);
+    move(0, 0);
+    display7off(true);
+}
+
+void maneuver3(bool hex)
+{
+    display7off(false);
+
+    move(-50, -50);
+    leftDisplays7(50, hex);
+    rightDisplays7(50, hex);
+    _delay_ms(1000);
+
+    move(-70, 70);
+    leftDisplays7(70, hex);
+    rightDisplays7(70, hex);
+    _delay_ms(1500);
+
+    for(uint8_t i = 0; i <= 99; i = i+3)
     {
-        category = "OK";
+        move(i, i);
+        leftDisplays7(i, hex);
+        rightDisplays7(i, hex);
+        _delay_ms(50);
     }
-    return category;
+
+    for(uint8_t i = 99; i >= 74; i = i-5)
+    {
+        move(i, i);
+        leftDisplays7(i, hex);
+        rightDisplays7(i, hex);
+        _delay_ms(500);
+    }
+
+    _delay_ms(2000);
+    move(0, 0);
+    display7off(true);
+}
+
+void maneuver4(bool hex)
+{
+    display7off(false);
+
+    move(78, 78);
+    leftDisplays7(78, hex);
+    rightDisplays7(78, hex);
+
+    uint8_t i = 78;
+
+    for(; i >= 48; i = i-2)
+    {
+        move(i, 78);
+        leftDisplays7(i, hex);
+        rightDisplays7(78, hex);
+        _delay_ms(250);
+    }
+
+    _delay_ms(1500);
+
+
+    for(; i <= 78; i = i+2)
+    {
+        move(i, 78);
+        leftDisplays7(i, hex);
+        rightDisplays7(78, hex);
+        _delay_ms(250);
+    }
+
+    _delay_ms(2000);
+    move(0, 0);
+    display7off(true);
+
+}
+
+void maneuver5(bool hex)
+{
+    display7off(false);
+
+    move(78, 78);
+    leftDisplays7(78, hex);
+    rightDisplays7(78, hex);
+
+    uint8_t i = 78;
+
+    for(; i >= 48; i = i-2)
+    {
+        move(78, i);
+        leftDisplays7(78, hex);
+        rightDisplays7(i, hex);
+        _delay_ms(250);
+    }
+
+    _delay_ms(1500);
+
+
+    for(; i <= 78; i = i+2)
+    {
+        move(78, i);
+        leftDisplays7(78, hex);
+        rightDisplays7(i, hex);
+        _delay_ms(250);
+    }
+
+    _delay_ms(2000);
+    move(0, 0);
+    display7off(true);
+
+}
+
+void executeManeuver(uint8_t maneuverId, bool hexadecimalDisplay)
+{
+    if(maneuverId == 1) {
+        char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        maneuver1(hexadecimalDisplay);
+    }
+
+    else if(maneuverId == 2){
+        char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        maneuver2(hexadecimalDisplay);
+    }
+
+    else if(maneuverId == 3) {
+        char mot[] = "Manoeuvre 3 ( DANGER - DANGER - DANGER) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        maneuver3(hexadecimalDisplay);
+    }
+
+    else if(maneuverId == 4) {
+        char mot[] = "Manoeuvre 4 (OK - OK - DANGER) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        maneuver4(hexadecimalDisplay);
+    }
+
+    else if(maneuverId == 5){
+        char mot[] = "Manoeuvre 5 (DANGER - OK - OK) \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+        maneuver5(hexadecimalDisplay);
+    }
+    else if(maneuverId == 0) {
+
+        //Invalid Maneuver
+        char mot[] = "Manoeuvre invalide \n";
+        DEBUG_PRINT(mot, sizeof(mot));
+    }
 }
 
 
@@ -102,6 +302,5 @@ void addManeuverId(char categories[], uint8_t maneuverId)
         break;
     }
 }
-
 
 #endif

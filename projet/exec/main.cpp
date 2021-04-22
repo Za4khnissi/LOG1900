@@ -9,177 +9,16 @@
 #include "Converter.h"
 #include "Maneuver.h"
 #include "Keyboard.h"
-#include "Display.h"
 #include "Time.h"
 
 #define CONV_FACTOR 5.0F / 255.0F
 #define DEFAULT_FREQUENCE 7812
 #define ONE_ 1
 
+volatile bool maneuverModeActive = false;
 
-volatile uint8_t maneuverId;
 volatile uint8_t lecture = 0;
-
-
-void moteur(int8_t ocr1b, int8_t ocr1a)
-{
-    if(ocr1a < 0)
-    {
-        PORTD |= _BV(PD3);                 
-        PORTD &= ~_BV(PD6);                
-        ocr1b = (ocr1b*255)/100;
-        ocr1a = (-1*(ocr1a*255))/100;
-    }
-
-    else if((ocr1b > 0) & (ocr1a > 0))
-    {
-        PORTD |= _BV(PD3);            
-        PORTD |= _BV(PD6);                  
-        ocr1b = (ocr1b*255)/100;
-        ocr1a = (ocr1a*255)/100;
-    }
-
-    else if(ocr1b < 0)
-    {
-        PORTD &= ~_BV(PD3);                 
-        PORTD |= _BV(PD6);                  
-        ocr1b = (-1*(ocr1b*255))/100;
-        ocr1a = (ocr1a*255)/100;
-    }
-
-    else if((ocr1a < 0) & (ocr1b < 0))
-    {
-        PORTD &= ~_BV(PD3);                 
-        PORTD &= ~_BV(PD6);                  
-        ocr1b = (-1*(ocr1b*255))/100;
-        ocr1a = (-1*(ocr1a*255))/100;
-    }
-    PWM::adjustPWM(ocr1a, ocr1b);
-}
-void maneuver1()
-{
-
-    moteur(-35, 35);
-    _delay_ms(1500);
-
-    moteur(35, 35);
-    _delay_ms(2000);
-
-    moteur(35, -35);
-    _delay_ms(1500);
-
-    moteur(35, 35); 
-
-    for(uint8_t i = 35; i <= 95; i = i+5)
-    {
-        moteur(i, i);
-        _delay_ms(125);
-    }
-
-    _delay_ms(2000);
-    moteur(0, 0);
-}
-
-void maneuver2()
-{
-
-    moteur(35, -35);
-    _delay_ms(1500);
-
-    moteur(35, 35);
-    _delay_ms(2000);
-
-    moteur(-35, 35);
-    _delay_ms(1500);
-
-    moteur(35, 35);
-
-    for(uint8_t i = 35; i < 95; i = i+5)
-    {
-        moteur(i, i);
-        _delay_ms(125);
-    }
-
-    _delay_ms(2000);
-    moteur(0, 0);
-}
-
-void maneuver3()
-{
-
-    moteur(-50, -50);
-    _delay_ms(1000);
-
-    moteur(-70, 70);
-    _delay_ms(1500);
-
-    for(uint8_t i = 0; i <= 99; i = i+3)
-    {
-        moteur(i, i);
-        _delay_ms(50);
-    }
-
-    for(uint8_t i = 99; i >= 74; i = i-5)
-    {
-        moteur(i, i);
-        _delay_ms(500);
-    }
-
-    _delay_ms(2000);
-    moteur(0, 0);
-}
-
-void maneuver4()
-{
-
-    moteur(78, 78);
-
-    uint8_t i = 78;
-
-    for(; i >= 48; i = i-2)
-    {
-        moteur(i, 78);
-        _delay_ms(250);
-    }
-
-    _delay_ms(1500);
-
-
-    for(; i <= 78; i = i+2)
-    {
-        moteur(i, 78);
-        _delay_ms(250);
-    }
-
-    _delay_ms(2000);
-    moteur(0, 0);
-}
-
-void maneuver5()
-{
-
-    moteur(78, 78);
-
-    uint8_t i = 78;
-
-    for(; i >= 48; i = i-2)
-    {
-        moteur(78, i);
-        _delay_ms(250);
-    }
-
-    _delay_ms(1500);
-
-
-    for(; i <= 78; i = i+2)
-    {
-        moteur(78, i);
-        _delay_ms(250);
-    }
-
-    _delay_ms(2000);
-    moteur(0, 0);
-}
+volatile bool hexadecimalDisplay = false; 
 
 
 ISR(TIMER0_COMPA_vect){
@@ -204,47 +43,12 @@ ISR(TIMER1_COMPA_vect)
 
 ISR (INT0_vect) {
 
-    if(maneuverId == 1) {
-        char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        maneuver1();
-    }
-
-    else if(maneuverId == 2){
-        char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        maneuver2();
-    }
-
-    else if(maneuverId == 3) {
-        char mot[] = "Manoeuvre 3 ( DANGER - DANGER - DANGER) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        maneuver3();
-    }
-
-    else if(maneuverId == 4) {
-        char mot[] = "Manoeuvre 4 (OK - OK - DANGER) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        maneuver4();
-    }
-
-    else if(maneuverId == 5){
-        char mot[] = "Manoeuvre 5 (DANGER - OK - OK) \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-        maneuver5();
-    }
-    else if(maneuverId == 0) {
-        //Invalid Maneuver
-        char mot[] = "Manoeuvre invalid \n";
-        DEBUG_PRINT(mot, sizeof(mot));
-    }
-    
-    EIFR |= (1 << INTF0) ;
+    maneuverModeActive = true;
+    EIFR |= (1 << INTF0);
 }
 
-void partirMinuterie0 () {
-    // mode CTC du timer 0 avec horloge divisée par 1024
-    // interruption après la durée spécifiée
+void startTimer0 () {
+
     TCNT0 = 0;
     OCR0A = 78; 
     TCCR0A |= (1 << WGM01);
@@ -252,14 +56,10 @@ void partirMinuterie0 () {
     TIMSK0 |= (1 << OCIE0A);
 }
 
-void partirMinuterie(uint16_t duree)
+void startTimer(uint16_t duree)
 {
 
-    // mode CTC du timer 1 avec horloge divisée par 1024
-
-    // interruption après la durée spécifiée
     lecture = 0;
-
     TCNT1 = 0;
     OCR1A = duree;
     TCCR1A = 1 << WGM12;
@@ -271,18 +71,21 @@ void partirMinuterie(uint16_t duree)
 // Mode demarrage
 void startUpMode() 
 {
-    const char baudRate[] = "9600 bps\n";
+    const char baudRate[] = " 9600 bps\n";
     DEBUG_PRINT(baudRate, sizeof(baudRate));
     
-    afficheursDemarrage();
+    leftDisplays7(AB, true); 
+    rightDisplays7(CD, true);
 
     Motor motor;
 
     motor.forward(254, 254);
-    _delay_ms(1000); // Timer?
+    _delay_ms(1000); 
     motor.backward(254, 254);
-    _delay_ms(1000); // Timer?
+    _delay_ms(1000);
     motor.stop();
+
+    display7off(true);
     
 }
 
@@ -302,35 +105,35 @@ void clear(char array[], uint8_t size)
 void init ( void ) {
     cli ();
 
-    // Iniatialisation des ports
-    DDRA = 0xFD; //1111 1101 
-    DDRB = 0xFD; //1111 1101
-    DDRD = 0xF8; //1111 1000
+    
+    DDRA = 0xFD;  
+    DDRB = 0xFD; 
+    DDRC |= (1 << PC0) | (1 << PC1);
 
-    // cette procédure ajuste le registre EIMSK
-    // de l’ATmega324PA pour permettre les interruptions externes
+    DDRD = 0x78; 
+
+    // permettre les interruptions externes
     EIMSK |= (1 << INT0) ;
 
-    // il faut sensibiliser les interruptions externes aux
+    // sensibiliser les interruptions externes aux
     // changements de niveau du bouton-poussoir
-    // en ajustant le registre EICRA
     EICRA |= (1 << ISC01) | (1 << ISC00) ;
 
-    // sei permet de recevoir à nouveau des interruptions.
     sei ();
 }
 
-void initFrequence(){
+void initFrequency(){
     cli();
     DDRD &= ~_BV(PD4) | ~_BV(PD5);
     sei();
 }
 
-
 int main() {
     
     init();
-    partirMinuterie0();
+    startTimer0();
+
+    uint8_t maneuverId;
 
     uint8_t adc = 0;
     float voltage = 0.0F;
@@ -351,16 +154,25 @@ int main() {
 
     AnalogDigConv converter = AnalogDigConv::INTERNAL;
     
-    // Mode demarrage
+
     startUpMode();
 
     for(;;) {
+        
+        if(maneuverModeActive)
+        {
+            executeManeuver(maneuverId, hexadecimalDisplay);   
+            maneuverModeActive = false;
+        }
 
         bouton = detectPressedButton();
 
-        initFrequence();
-        partirMinuterie(frequence);
-        do {} while (lecture == 0);
+        initFrequency();    
+        startTimer(frequence);
+
+        do {
+            bouton = detectPressedButton();
+        } while (lecture == 0 && bouton == PressedButton::REPEAT);
 
         switch(bouton) {
 
@@ -379,33 +191,34 @@ int main() {
                 DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", 38);
             break;
             
-            case PressedButton ::R:
+            case PressedButton::R:
                 DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::ON_FREQUENCE;
             break;
 
-            case PressedButton ::V:
+            case PressedButton::V:
                 DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::ON_DISTANCE_CHANGE;
             break;
 
-            case PressedButton ::C:
+            case PressedButton::C:
                 DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", 38);
                 displayMode = DisplayMode::ON_CATEGORY_CHANGE;
             break;
 
-            case PressedButton ::I:
+            case PressedButton::I:
                 DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", 38);
                 converter = AnalogDigConv::INTERNAL;
             break;
 
-            case PressedButton ::E:
+            case PressedButton::E:
                 DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", 38);
                 converter = AnalogDigConv::EXTERNAL;
             break;
 
-            case PressedButton ::HASHTAG:
+            case PressedButton::HASHTAG:
                 DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 38);
+                hexadecimalDisplay = !hexadecimalDisplay;
             break;
 
             default:
