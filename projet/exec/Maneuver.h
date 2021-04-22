@@ -89,7 +89,7 @@ void maneuver2( bool hex)
 
     move(35, 35);
 
-    for(uint8_t i = 35; i < 95; i = i+5)
+    for(uint8_t i = 35; i <= 95; i = i+5)
     {
         move(i, i);
         leftDisplays7(i, hex);
@@ -145,9 +145,9 @@ void maneuver4(bool hex)
     leftDisplays7(78, hex);
     rightDisplays7(78, hex);
 
-    uint8_t i = 78;
+    
 
-    for(; i >= 48; i = i-2)
+    for(uint8_t i = 78; i >= 48; i = i-2)
     {
         move(i, 78);
         leftDisplays7(i, hex);
@@ -158,7 +158,7 @@ void maneuver4(bool hex)
     _delay_ms(1500);
 
 
-    for(; i <= 78; i = i+2)
+    for(uint8_t i = 48; i <= 78; i = i+2)
     {
         move(i, 78);
         leftDisplays7(i, hex);
@@ -180,9 +180,9 @@ void maneuver5(bool hex)
     leftDisplays7(78, hex);
     rightDisplays7(78, hex);
 
-    uint8_t i = 78;
+    
 
-    for(; i >= 48; i = i-2)
+    for(uint8_t i = 78; i >= 48; i = i-2)
     {
         move(78, i);
         leftDisplays7(78, hex);
@@ -193,7 +193,7 @@ void maneuver5(bool hex)
     _delay_ms(1500);
 
 
-    for(; i <= 78; i = i+2)
+    for(uint8_t i = 48; i <= 78; i = i+2)
     {
         move(78, i);
         leftDisplays7(78, hex);
