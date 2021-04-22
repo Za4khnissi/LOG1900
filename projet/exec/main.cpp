@@ -1,7 +1,7 @@
 /**
- * INF1900 - PROJET FINAL
+ *                                    INF1900 - PROJET FINAL
  * 
- * Robot qui détecte des obstacles et qui effectue des manœuvres d'évitement
+ *              Robot qui détecte des obstacles et qui effectue des manœuvres d'évitement
  * 
  * AUTEURS: Einstein Franck Tiomo Epongo
  *          Moussa Abdillahi Daoud   
@@ -15,39 +15,39 @@
  *       -----------------------------------------------------------------------------------------
  *       |      Broche       |    Direction  |                   Utilisation                     |  
  *       |---------------------------------------------------------------------------------------|
- *       |        A0         |       OUT     |  Choix du can externe / interne                   |
+ *       |        A0         |       OUT     | Choix du can externe / interne                    |
  *       |---------------------------------------------------------------------------------------|
  *       |        A1         |       IN      | Transmettre la tension au can interne             |
  *       |---------------------------------------------------------------------------------------|
- *       |      A2 - A3      |       OUT     |  Sélectionner les capteurs                        | 
+ *       |      A2 - A3      |       OUT     | Sélectionner les capteurs                         | 
  *       |---------------------------------------------------------------------------------------|
- *       | A4 – A5 – A6 – A7 |       OUT     |   Afficheurs 7 segments                           |    
+ *       | A4 – A5 – A6 – A7 |       OUT     | Afficheurs 7 segments                             |     
  *       |---------------------------------------------------------------------------------------|                
- *       |       B0          |       OUT     |   Output enable du can externe                    |         
+ *       |       B0          |       OUT     | Output enable du can externe                      |         
  *       |---------------------------------------------------------------------------------------|
- *       |       B1          |       IN      |  Recevoir les bits de la conversion du can externe|
+ *       |       B1          |       IN      | Recevoir les bits de la conversion du can externe |
  *       |---------------------------------------------------------------------------------------|
  *       |   B2 – B3 – B4    |	     OUT	 | Sélectionner les valeurs à l’entrée du can externe|
  *       |---------------------------------------------------------------------------------------|
- *       |       B5          |	     OUT     |	Input enable du 1er afficheur                    |
+ *       |       B5          |	     OUT     | Input enable du 1er afficheur                     |
  *       |---------------------------------------------------------------------------------------|
- *       |       B6	         |       OUT     |	Input Enable du 2ème afficheur                   |
+ *       |       B6	         |       OUT     | Input Enable du 2ème afficheur                    |
  *       |---------------------------------------------------------------------------------------|
- *       |       B7          |	     OUT     |	Output Enable des afficheurs gauches             |
+ *       |       B7          |	     OUT     | Output Enable des afficheurs gauches              |
  *       |---------------------------------------------------------------------------------------|
- *       |       C0	         |       OUT	 |   Input Enable du 3ème afficheur                  |
+ *       |       C0	         |       OUT	 | Input Enable du 3ème afficheur                    |
  *       |---------------------------------------------------------------------------------------|
- *       |       C1	         |       OUT     |	Input Enable du 4ème afficheur                   |
+ *       |       C1	         |       OUT     | Input Enable du 4ème afficheur                    |
  *       |---------------------------------------------------------------------------------------|
- *       |   C2 – C3 – C4    |		 IN      |   Entrées des claviers                            |
+ *       |   C2 – C3 – C4    |		 IN      | Entrées des claviers                              |
  *       |---------------------------------------------------------------------------------------|
- *       |   C5 – C6 – C7	 |       OUT     |	Sorties des claviers                             |
+ *       |   C5 – C6 – C7	 |       OUT     | Sorties des claviers                              |
  *       |---------------------------------------------------------------------------------------|
- *       |       D2	         |       IN      |	INT0                                             |
+ *       |       D2	         |       IN      | INT0                                              |
  *       |---------------------------------------------------------------------------------------|
- *       |      D3 – D6 	 |       OUT	 |   Directions des roues gauches et droite          |
+ *       |      D3 – D6 	 |       OUT	 | Directions des roues gauches et droite            |
  *       |---------------------------------------------------------------------------------------|
- *       |     D4 – D5	     |       OUT	 |   OC1B et OC1A                                    |
+ *       |     D4 – D5	     |       OUT	 | OC1B et OC1A                                      |
  *       |---------------------------------------------------------------------------------------|
  *   
  */
@@ -213,12 +213,6 @@ int main() {
     startUpMode();
 
     for(;;) {
-        
-        if(maneuverModeActive)
-        {
-            executeManeuver(maneuverId, hexadecimalDisplay);   
-            maneuverModeActive = false;
-        }
 
         bouton = detectPressedButton();
 
@@ -351,6 +345,12 @@ int main() {
             default:
                 break;
             }
+
+        if(maneuverModeActive)
+        {
+            executeManeuver(maneuverId, hexadecimalDisplay);   
+            maneuverModeActive = false;
+        }
 
         clearCharArray(categories, sizeof(categories));
     }
