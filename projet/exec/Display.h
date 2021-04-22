@@ -101,7 +101,7 @@ void rightDisplays7(uint8_t vitesse, bool hexNum) {
  * conversions analogiques --> numeriques
  *
  * */
-void display(float distances[], const char categories[], AnalogDigConv converter)
+void display(float distances[], const char categories[])
 {
     char buffer[MAX_DISPALY_ARRAY_SIZE] = "";
     char numbersBuffer[BUFFER_SIZE] = "";

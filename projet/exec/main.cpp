@@ -133,7 +133,7 @@ int main() {
     init();
     startTimer0();
 
-    uint8_t maneuverId;
+    uint8_t maneuverId = 0;
 
     uint8_t adc = 0;
     float voltage = 0.0F;
@@ -271,7 +271,7 @@ int main() {
         {
             case DisplayMode::ON_FREQUENCE:
 
-                display(distances, categories, converter);
+                display(distances, categories);
                 break;
                 
             
@@ -279,7 +279,7 @@ int main() {
 
                 if (distChanged)
                 {
-                    display(distances, categories, converter);
+                    display(distances, categories);
                     distChanged = false;
                 }
                 break;
@@ -288,7 +288,7 @@ int main() {
             
                 if(categoryChanged)
                 {
-                    display(distances, categories, converter);
+                    display(distances, categories);
                     categoryChanged = false;
                 }
                 break;
