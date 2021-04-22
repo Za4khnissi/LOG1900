@@ -16,6 +16,11 @@ enum PressedButton {
     REPEAT
 };
 
+/** Detecte le bouton qui du clavier qui a ete presse
+ *
+ * @return bouton qui a ete presse. Si aucun bouton n'est pressee, une 
+ * valeur par defaut est retournee
+ */
 PressedButton detectPressedButton() {
 
         PressedButton bouton = PressedButton::REPEAT;

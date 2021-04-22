@@ -1,3 +1,57 @@
+/**
+ * INF1900 - PROJET FINAL
+ * 
+ * Robot qui détecte des obstacles et qui effectue des manœuvres d'évitement
+ * 
+ * AUTEURS: Einstein Franck Tiomo Epongo
+ *          Moussa Abdillahi Daoud   
+ *          Zabiullah Shair Zaie
+ *          Zakarya Khnissi
+ * 
+ * EQUIPE:  0320
+ * 
+ *                                  IDENTIFICATIONS MATÉRIELLES :
+ * 
+ *       -----------------------------------------------------------------------------------------
+ *       |      Broche       |    Direction  |                   Utilisation                     |  
+ *       |---------------------------------------------------------------------------------------|
+ *       |        A0         |       OUT     |  Choix du can externe / interne                   |
+ *       |---------------------------------------------------------------------------------------|
+ *       |        A1         |       IN      | Transmettre la tension au can interne             |
+ *       |---------------------------------------------------------------------------------------|
+ *       |      A2 - A3      |       OUT     |  Sélectionner les capteurs                        | 
+ *       |---------------------------------------------------------------------------------------|
+ *       | A4 – A5 – A6 – A7 |       OUT     |   Afficheurs 7 segments                           |    
+ *       |---------------------------------------------------------------------------------------|                
+ *       |       B0          |       OUT     |   Output enable du can externe                    |         
+ *       |---------------------------------------------------------------------------------------|
+ *       |       B1          |       IN      |  Recevoir les bits de la conversion du can externe|
+ *       |---------------------------------------------------------------------------------------|
+ *       |   B2 – B3 – B4    |	     OUT	 | Sélectionner les valeurs à l’entrée du can externe|
+ *       |---------------------------------------------------------------------------------------|
+ *       |       B5          |	     OUT     |	Input enable du 1er afficheur                    |
+ *       |---------------------------------------------------------------------------------------|
+ *       |       B6	         |       OUT     |	Input Enable du 2ème afficheur                   |
+ *       |---------------------------------------------------------------------------------------|
+ *       |       B7          |	     OUT     |	Output Enable des afficheurs gauches             |
+ *       |---------------------------------------------------------------------------------------|
+ *       |       C0	         |       OUT	 |   Input Enable du 3ème afficheur                  |
+ *       |---------------------------------------------------------------------------------------|
+ *       |       C1	         |       OUT     |	Input Enable du 4ème afficheur                   |
+ *       |---------------------------------------------------------------------------------------|
+ *       |   C2 – C3 – C4    |		 IN      |   Entrées des claviers                            |
+ *       |---------------------------------------------------------------------------------------|
+ *       |   C5 – C6 – C7	 |       OUT     |	Sorties des claviers                             |
+ *       |---------------------------------------------------------------------------------------|
+ *       |       D2	         |       IN      |	INT0                                             |
+ *       |---------------------------------------------------------------------------------------|
+ *       |      D3 – D6 	 |       OUT	 |   Directions des roues gauches et droite          |
+ *       |---------------------------------------------------------------------------------------|
+ *       |     D4 – D5	     |       OUT	 |   OC1B et OC1A                                    |
+ *       |---------------------------------------------------------------------------------------|
+ *   
+ */
+
 #define F_CPU 8000000UL
 #include <avr/interrupt.h>
 
@@ -13,7 +67,8 @@
 
 #define CONV_FACTOR 5.0F / 255.0F
 #define DEFAULT_FREQUENCE 7812
-#define ONE_ 1
+#define MSG_SIZE 38
+#define MAX_SIZE 40
 
 volatile bool maneuverModeActive = false;
 
@@ -93,7 +148,7 @@ void startUpMode()
  * @param array tableau a vider
  * @param size taille du tableau a vider 
  */
-void clear(char array[], uint8_t size)
+void clearCharArray(char array[], uint8_t size)
 {
     
     for (uint8_t i = 0; i < size; i++)
@@ -144,7 +199,7 @@ int main() {
     float distances[3] = {0, 0, 0};
     bool distChanged = false;
 
-    char categories[40] = "";
+    char categories[MAX_SIZE] = "";
     bool categoryChanged = false;
 
     PressedButton  bouton;
@@ -178,46 +233,46 @@ int main() {
 
             case PressedButton::ONE:
                 frequence = DEFAULT_FREQUENCE;
-                DEBUG_PRINT("Le bouton 1 du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton 1 du clavier a ete appuye.\n", MSG_SIZE);
             break;
 
             case PressedButton::TWO:
                 frequence = DEFAULT_FREQUENCE / 2;
-                DEBUG_PRINT("Le bouton 2 du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton 2 du clavier a ete appuye.\n", MSG_SIZE);
             break;
 
             case PressedButton::FOUR:
                 frequence = DEFAULT_FREQUENCE / 4;
-                DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton 4 du clavier a ete appuye.\n", MSG_SIZE);
             break;
             
             case PressedButton::R:
-                DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton R du clavier a ete appuye.\n", MSG_SIZE);
                 displayMode = DisplayMode::ON_FREQUENCE;
             break;
 
             case PressedButton::V:
-                DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton V du clavier a ete appuye.\n", MSG_SIZE);
                 displayMode = DisplayMode::ON_DISTANCE_CHANGE;
             break;
 
             case PressedButton::C:
-                DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton C du clavier a ete appuye.\n", MSG_SIZE);
                 displayMode = DisplayMode::ON_CATEGORY_CHANGE;
             break;
 
             case PressedButton::I:
-                DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton I du clavier a ete appuye.\n", MSG_SIZE);
                 converter = AnalogDigConv::INTERNAL;
             break;
 
             case PressedButton::E:
-                DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton E du clavier a ete appuye.\n", MSG_SIZE);
                 converter = AnalogDigConv::EXTERNAL;
             break;
 
             case PressedButton::HASHTAG:
-                DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", 38);
+                DEBUG_PRINT("Le bouton # du clavier a ete appuye.\n", MSG_SIZE);
                 hexadecimalDisplay = !hexadecimalDisplay;
             break;
 
@@ -297,7 +352,7 @@ int main() {
                 break;
             }
 
-        clear(categories, sizeof(categories));
+        clearCharArray(categories, sizeof(categories));
     }
     return 0;
 }

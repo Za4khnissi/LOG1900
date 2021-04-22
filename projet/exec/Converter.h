@@ -11,7 +11,10 @@ enum AnalogDigConv
     INTERNAL,
     EXTERNAL
 };
-
+/** Fait les configurations necessaires pour le can utilisee actuellement
+ * 
+ * @param can convertisseur dont on veut activer le fonctionnement
+ */
 void selectCan(AnalogDigConv can)
 {
     switch (can)
@@ -26,7 +29,11 @@ void selectCan(AnalogDigConv can)
     }
 }
 
-
+/** Calcule la valeur de la conversion analogique numerique
+ *  
+ * @param converter convertisseur sur lequel la conversion est faite
+ * @return valeur numerique correspondant a la valeur analogique lue
+ */
 uint8_t computeConversion(AnalogDigConv converter)
 {
     selectCan(converter);

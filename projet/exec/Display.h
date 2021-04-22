@@ -20,7 +20,12 @@ enum DisplayMode
     ON_CATEGORY_CHANGE
 };
 
-
+/** Eteint ou allume un afficheur 7 segment 
+ * 
+ * @param off valeur booleene permettant de prendre la decision 
+ * de soit allumer ou eteindre
+ * 
+ */
 void display7off(bool off) 
 {
     if(off)
@@ -36,6 +41,12 @@ void display7off(bool off)
     }
 }
 
+/** Affiche une vitesse sur les afficheurs 7 segments gauche
+ * 
+ * @param vitesse vitesse a afficher
+ * @param hexNum variable decidant si l'affichage se fait en 
+ * hexadecimal ou en decimal
+ */
 void leftDisplays7(uint8_t vitesse, bool hexNum) {
     uint8_t left;
     uint8_t right;
@@ -64,7 +75,12 @@ void leftDisplays7(uint8_t vitesse, bool hexNum) {
     _delay_ms(50);
 }
 
-    
+/** Affiche une vitesse sur les afficheurs 7 segments droit
+ * 
+ * @param vitesse vitesse a afficher
+ * @param hexNum variable decidant si l'affichage se fait en 
+ * hexadecimal ou en decimal
+ */
 void rightDisplays7(uint8_t vitesse, bool hexNum) {
     uint8_t left;
     uint8_t right;

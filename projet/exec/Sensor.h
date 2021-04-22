@@ -10,6 +10,12 @@ enum Sensor
     RIGHT
 };
 
+/** Active le fonctionnement d'un capteur en faisant les configurations
+ * necessaires sur les registres 
+ * 
+ * @param sensor capteur que l'on veut activer
+ * 
+ */
 void selectSensor(uint8_t sensor)
 {
     switch (sensor)

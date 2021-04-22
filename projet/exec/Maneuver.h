@@ -207,38 +207,44 @@ void maneuver5(bool hex)
 
 }
 
-void executeManeuver(uint8_t maneuverId, bool hexadecimalDisplay)
+/** Execute une manoeuvre selon le numero de celle ci
+ * 
+ * @param maneuverID numero de la manoeuvre a executer
+ * @param hexadecimalDisplay determine si l affichage des vitesses doit 
+ * etre hexadecimale ou decimale 
+ */
+void executeManeuver(uint8_t maneuverID, bool hexadecimalDisplay)
 {
-    if(maneuverId == 1) {
+    if(maneuverID == 1) {
         char mot[] = "Manoeuvre 1 (OK - ATTENTION - ATTENTION) \n";
         DEBUG_PRINT(mot, sizeof(mot));
         maneuver1(hexadecimalDisplay);
     }
 
-    else if(maneuverId == 2){
+    else if(maneuverID == 2){
         char mot[] = "Manoeuvre 2 ( ATTENTION - ATTENTION - OK) \n";
         DEBUG_PRINT(mot, sizeof(mot));
         maneuver2(hexadecimalDisplay);
     }
 
-    else if(maneuverId == 3) {
+    else if(maneuverID == 3) {
         char mot[] = "Manoeuvre 3 ( DANGER - DANGER - DANGER) \n";
         DEBUG_PRINT(mot, sizeof(mot));
         maneuver3(hexadecimalDisplay);
     }
 
-    else if(maneuverId == 4) {
+    else if(maneuverID == 4) {
         char mot[] = "Manoeuvre 4 (OK - OK - DANGER) \n";
         DEBUG_PRINT(mot, sizeof(mot));
         maneuver4(hexadecimalDisplay);
     }
 
-    else if(maneuverId == 5){
+    else if(maneuverID == 5){
         char mot[] = "Manoeuvre 5 (DANGER - OK - OK) \n";
         DEBUG_PRINT(mot, sizeof(mot));
         maneuver5(hexadecimalDisplay);
     }
-    else if(maneuverId == 0) {
+    else if(maneuverID == 0) {
 
         //Invalid Maneuver
         char mot[] = "Manoeuvre invalide \n";
@@ -246,7 +252,11 @@ void executeManeuver(uint8_t maneuverId, bool hexadecimalDisplay)
     }
 }
 
-
+/** Selectionne la manoeuvre a executer
+ * 
+ * @param distances distances mesurees par les capteurs
+ * @return numero de la manoeuvre a executer
+ */
 uint8_t selectManeuver(float distances[])
 {
     uint8_t index = 0;

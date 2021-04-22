@@ -4,6 +4,11 @@
 #define MIN_DISTANCE 10.0F
 #include <avr/io.h>
 
+/** Determine la categorie d'une distance
+ * 
+ * @param distance distance dont on veut evaluer la categorie
+ * @return numero de la categorie a la laquelle appartient la distance
+ */
 uint8_t checkCategory(float distance) {
     if (distance >= MIN_DISTANCE && distance < 20.0F)
         return 1;
